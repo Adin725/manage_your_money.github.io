@@ -1,47 +1,32 @@
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti seluruh blok ini)
- * ==========================================================
- * (DIMODIFIKASI: Memperbaiki error sintaks dan menggabungkan 
- * logika fade-out splash screen)
- */
 document.addEventListener('DOMContentLoaded', () => {
-  // Menampilkan Splash Screen dan Loading Screen
-  setTimeout(() => { // <--- Ini setTimeout untuk SPLASH (3 detik)
+  // logic splash screen
+  setTimeout(() => { 
     const splashScreen = document.getElementById('splash-screen');
     
-    // 1. PERBAIKAN: Gunakan animasi CSS (fade-out)
     if (splashScreen) {
         splashScreen.classList.add('fade-out');
     }
     document.getElementById('loading-screen').style.display = 'flex';
-
-    // 2. Sembunyikan div splash screen setelah animasinya selesai (1s)
+    
     setTimeout(() => {
         if (splashScreen) splashScreen.style.display = 'none';
     }, 1000); 
 
-    // ==========================================================
-    // ===== INI ADALAH BLOK YANG HILANG/ERROR DI KODE ANDA =====
-    // ==========================================================
-    // 3. Logika untuk LOADING SCREEN (berjalan paralel)
+    // sembunyiin loading & cek status login user
     setTimeout(() => {
       document.getElementById('loading-screen').style.display = 'none';
       
-      // Cek apakah pengguna sudah login
       const currentUser = localStorage.getItem('currentUser');
       if (currentUser) {
         showWelcomeScreen(currentUser);
       } else {
         showAuthContainer();
       }
-    }, 3000); // <--- Durasi 3 detik untuk loading screen
-    // ==========================================================
+    }, 3000); 
 
-  }, 3000); // <--- Durasi 3 detik untuk splash screen
-
+  }, 3000); 
   
-  // Toggle Password Visibility
+  // toggle mata password
   const togglePassword = document.getElementById('toggle-password');
   const authPasswordInput = document.getElementById('auth-password');
   if (togglePassword && authPasswordInput) {
@@ -52,21 +37,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-
-  // Handle Auth Button Click (Login/Register)
+  // handle klik login/register
   const authBtn = document.getElementById('auth-btn');
   if (authBtn) {
     authBtn.addEventListener('click', () => {
       const emailInput = document.getElementById('auth-email');
       const passwordInput = document.getElementById('auth-password');
-      if (!emailInput || !passwordInput) return; // Guard clause
+      if (!emailInput || !passwordInput) return;
 
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
       const users = JSON.parse(localStorage.getItem('users')) || {};
 
       if (isLogin) {
-        // Proses Login
+        // proses login
         if (users[email] && users[email] === password) {
           showLoading('Menyambung...');
           setTimeout(() => {
@@ -78,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
           showNotification('Email atau password salah', 'danger');
         }
       } else {
-        // Proses Registrasi
+        // proses register
         if (users[email]) {
           showNotification('Email sudah terdaftar', 'danger');
         } else {
@@ -92,8 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-
-  // Handle Switch to Register
+  // switch form mode
   const switchToRegister = document.getElementById('switch-to-register');
   if (switchToRegister) {
     switchToRegister.addEventListener('click', (e) => {
@@ -103,8 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-
-  // Handle Switch to Login (delegated)
   document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'switch-to-login') {
       e.preventDefault();
@@ -113,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Handle Tips Buttons
+  // tombol tips
   const dailyTipsButton = document.getElementById('daily-tips-button');
   const categoryTipsButton = document.getElementById('category-tips-button');
 
@@ -130,49 +111,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Status autentikasi
+// state global
 let isLogin = true;
 
-// Chart Instances
+// variabel buat nyimpen instance chart
 let dailyExpenseChart;
 let categoryExpenseChart;
 let categoryDailyExpenseChart;
 let historyDailyExpenseChart;
 let historyCategoryExpenseChart;
 
-
-// BARU: Variabel untuk Modal dan State Animasi
+// variabel modal & animasi
 let zoomModal;
 let zoomChartInstance;
 let dailyDetailModal;
-let isDailyChartAnimating = false; // Untuk tombol Animasikan
-let dailyChartAnimationTimeout; // Untuk mengontrol animasi
+let isDailyChartAnimating = false; 
+let dailyChartAnimationTimeout; 
 
-// ===== TAMBAHKAN VARIABEL BARU UNTUK ANALISIS =====
-let anomalyChart; // Instance chart anomali (Scatter)
-let predictionChart; // Instance chart prediksi (Bar)
-let allUserExpensesCache = []; // Cache untuk semua data user
-let analysisDataLoaded = false; // Flag apakah data sudah dimuat
+// variabel fitur analisis & DOM lainnya
+let anomalyChart; 
+let predictionChart; 
+let allUserExpensesCache = []; 
+let analysisDataLoaded = false; 
 let infoModalInstance = null;
 let budgetAlertShownThisMonth = false;
-let budgetModal; // BARU
-let pemasukanModal; // BARU
-let transferModal; // BARU
-let pdfConfigModal; // BARU: Untuk modal di riwayat
-let customConfirmModal; // BARU: Untuk modal konfirmasi kustom
-const EXP_SALDO_DEFAULT_VIEW = 'tunai'; // BARU: Menyimpan state default
+let budgetModal; 
+let pemasukanModal; 
+let transferModal; 
+let pdfConfigModal; 
+let customConfirmModal; 
+const EXP_SALDO_DEFAULT_VIEW = 'tunai'; 
 let onConfirmCallback = () => {};
 
-// Fungsi untuk Menampilkan Auth Container
+// nampilin halaman auth (login/register)
 function showAuthContainer() {
   const authContainer = document.getElementById('auth-container');
   if (authContainer) {
       authContainer.style.display = 'block';
-      document.body.style.backgroundColor = '#4b0082'; // Warna ungu gelap
+      document.body.style.backgroundColor = '#4b0082';
   }
 }
 
-// Fungsi untuk Beralih ke Form Registrasi
 function switchToRegisterForm() {
   const authTitle = document.getElementById('auth-title');
   const authBtn = document.getElementById('auth-btn');
@@ -184,7 +163,6 @@ function switchToRegisterForm() {
   }
 }
 
-// Fungsi untuk Beralih ke Form Login
 function switchToLoginForm() {
   const authTitle = document.getElementById('auth-title');
   const authBtn = document.getElementById('auth-btn');
@@ -196,7 +174,7 @@ function switchToLoginForm() {
   }
 }
 
-// Fungsi untuk Menampilkan Notifikasi
+// toast notifikasi 
 function showNotification(message, type) {
   const notificationContainer = document.getElementById('notification-container');
   if (!notificationContainer) return;
@@ -204,23 +182,22 @@ function showNotification(message, type) {
   const notification = document.createElement('div');
   notification.classList.add('notification');
   if (type === 'success') {
-    notification.style.backgroundColor = '#28a745'; // Hijau
+    notification.style.backgroundColor = '#28a745'; 
   } else if (type === 'danger') {
-    notification.style.backgroundColor = '#dc3545'; // Merah
+    notification.style.backgroundColor = '#dc3545'; 
   }
   notification.textContent = message;
   notificationContainer.appendChild(notification);
 
-  // Animasi Slide Out
+  // auto hide
   setTimeout(() => {
     notification.style.animation = 'slideOut 0.5s forwards';
     notification.addEventListener('animationend', () => {
       notification.remove();
     });
-  }, 3000); // Tampil selama 3 detik
+  }, 3000); 
 }
 
-// Fungsi untuk Menampilkan Loading Screen dengan Teks
 function showLoading(text) {
   const loadingScreen = document.getElementById('loading-screen');
   if (!loadingScreen) return;
@@ -231,7 +208,6 @@ function showLoading(text) {
   loadingScreen.style.display = 'flex';
 }
 
-// Fungsi untuk Menyembunyikan Loading Screen
 function hideLoading() {
   const loadingScreen = document.getElementById('loading-screen');
   if (loadingScreen) {
@@ -239,7 +215,6 @@ function hideLoading() {
   }
 }
 
-// Fungsi untuk Menampilkan Aplikasi Utama
 function showApp() {
   const authContainer = document.getElementById('auth-container');
   const appContainer = document.getElementById('app-container');
@@ -248,16 +223,10 @@ function showApp() {
   document.body.style.backgroundColor = '#f4f6f9';
   initializeApp();
 }
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi lama Anda dengan ini)
- * ==========================================================
- * Fungsi ini menyuntikkan semua perbaikan CSS secara dinamis
- * untuk memperbaiki tampilan form dan statistik.
- */
+
+// inject css dinamis buat benerin styling bawaan yang berantakan
 function applyDynamicStyles() {
     const styleId = 'dynamic-mumy-styles';
-    // Hapus style lama jika ada, untuk memastikan pembaruan
     const oldStyle = document.getElementById(styleId);
     if (oldStyle) {
         oldStyle.remove();
@@ -266,110 +235,94 @@ function applyDynamicStyles() {
     const style = document.createElement('style');
     style.id = styleId;
     style.innerHTML = `
-        /* 1. PERBAIKAN: Konsistensi Form Tambah Pengeluaran (Barang, Jumlah, Kategori) */
+        /* konsistensi form input */
         .expense-form #barang,
         .expense-form #amount,
         .category-dropdown > button#kategori-button {
-            /* Paksa style agar sama dengan input bootstrap default */
             padding: 12px 16px !important; 
             margin-bottom: 15px !important;
             background-color: #ffffff !important;
             color: #333333 !important;
             border: 1px solid #d1d3e2 !important;
             border-radius: 8px !important;
-            font-size: 1rem !important; /* Menyamakan font-size (bawaan button 0.9rem) */
-            height: calc(1.5em + 0.75rem + 2px) !important; /* Menyamakan tinggi */
+            font-size: 1rem !important; 
+            height: calc(1.5em + 0.75rem + 2px) !important; 
             box-sizing: border-box !important;
         }
         
-        /* Style khusus untuk button kategori agar teksnya rapi */
         .category-dropdown > button#kategori-button {
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
             text-align: left !important;
             width: 100% !important;
-            line-height: 1.5 !important; /* Menyamakan line-height input */
+            line-height: 1.5 !important; 
         }
 
-        /* 2. PERBAIKAN: Konsistensi List Riwayat (Container Luar) */
+        /* wrapper riwayat */
         div.expenses-list {
-            /* Paksa style agar sama dengan input */
             padding: 12px 16px !important; 
             margin-top: 15px !important;
             background-color: #ffffff !important;
-            border: 1px solid #d1d3e2 !important; /* Border disamakan */
-            border-radius: 8px !important; /* Radius disamakan */
+            border: 1px solid #d1d3e2 !important; 
+            border-radius: 8px !important; 
             text-align: left;
             max-height: 200px; 
             overflow-y: auto; 
         }
 
-        /* ============================================================= */
-        /* 3. PERBAIKAN BARU: Mengecilkan Header Tanggal (Item di dalam Riwayat) */
-        /* ============================================================= */
+        /* ukuran header tanggal di riwayat */
         ul#expenses-ul > li {
-            /* Meng-override style inline dari renderExpensesList */
-            background-color: #f0f0f0 !important; /* Latar abu-abu */
-            font-weight: 600 !important; /* Sedikit tebal */
-            
-            /* Ini perbaikan utamanya: padding lebih kecil */
+            background-color: #f0f0f0 !important; 
+            font-weight: 600 !important; 
             padding: 10px 15px !important; 
             margin-bottom: 8px !important;
-            
-            /* Style lain dari .expenses-list li yg ingin dipertahankan */
             border-radius: 8px !important;
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
-            cursor: pointer; /* Menandakan bisa diklik */
+            cursor: pointer; 
         }
 
-        /* Target ikon chevron di dalam header tanggal */
+        /* icon panah collapse */
         ul#expenses-ul > li i.toggle-category {
-            color: #4b0082 !important; /* Ubah warna ikon agar lebih jelas */
+            color: #4b0082 !important; 
             transition: transform 0.2s ease;
         }
         
-        /* Atur ikon saat terbuka */
         ul#expenses-ul > li.expanded i.toggle-category {
             transform: rotate(180deg);
         }
 
-        /* Atur style untuk sub-item (expense-item) agar tidak terpengaruh */
         ul#expenses-ul ul li {
             background: #ffffff !important;
-            padding: 10px 15px !important; /* Padding normal */
+            padding: 10px 15px !important; 
             margin-bottom: 5px !important;
-            box-shadow: none !important; /* Hapus shadow di sub-item */
+            box-shadow: none !important; 
             font-weight: normal !important;
             cursor: default;
         }
-        /* ============================================================= */
-        /* AKHIR PERBAIKAN BARU */
-        /* ============================================================= */
 
-
-        /* 4. PERBAIKAN: Badge Statistik (Anti-wrap) */
+        /* fix badge stats biar ga wrap / patah barisnya */
         #daily-stats-container .badge,
         #history-content .badge,
         .category-expense-enhanced .badge {
-            max-width: none !important; /* Hapus batasan lebar */
-            white-space: nowrap !important; /* Paksa tetap satu baris */
+            max-width: none !important; 
+            white-space: nowrap !important; 
             display: inline-block !important;
         }
         #daily-stats-container .list-group-item > div:first-child,
         #history-content .list-group-item > div:first-child,
         .category-expense-enhanced .list-group-item > div:first-child {
             flex-shrink: 1; 
-            margin-right: 8px; /* Beri jarak ke badge */
+            margin-right: 8px; 
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        /* 5. PERBAIKAN: Re-skin Statistik Kategori & Riwayat (Copas dari Daily) */
+        /* rapihin stat list */
         .category-expense-enhanced .statistic,
         #history-content .statistic-container {
             padding: 0 !important; 
@@ -379,7 +332,6 @@ function applyDynamicStyles() {
             margin-top: 20px !important; 
         }
         
-        /* Style list-group bersama */
         .category-expense-enhanced .list-group,
         #history-content .list-group {
             border: 1px solid #dee2e6; 
@@ -387,7 +339,6 @@ function applyDynamicStyles() {
             overflow: hidden; 
         }
 
-        /* Style list-item bersama */
         .category-expense-enhanced .list-group-item,
         #history-content .list-group-item {
           border-bottom: 1px solid #eee;
@@ -403,7 +354,6 @@ function applyDynamicStyles() {
             border-bottom: none;
         }
         
-        /* Grup Kiri (Ikon + Teks) */
         .category-expense-enhanced .list-group-item > div:first-child,
         #history-content .list-group-item > div:first-child {
           display: flex;
@@ -414,7 +364,6 @@ function applyDynamicStyles() {
           text-align: left;
         }
 
-        /* Ikon Kiri (Wallet, etc.) */
         .category-expense-enhanced .list-group-item > div:first-child i:first-of-type,
         #history-content .list-group-item > div:first-child i:first-of-type {
           width: 16px;
@@ -425,7 +374,6 @@ function applyDynamicStyles() {
           flex-shrink: 0;
         }
 
-        /* Grup Kanan (Badge) */
         .category-expense-enhanced .list-group-item > div:last-child,
         #history-content .list-group-item > div:last-child {
           display: flex;
@@ -433,7 +381,6 @@ function applyDynamicStyles() {
           flex-shrink: 0;
         }
         
-        /* Badge di Grup Kanan */
         .category-expense-enhanced .badge,
         #history-content .badge {
           font-size: 1rem;
@@ -442,7 +389,6 @@ function applyDynamicStyles() {
           text-align: right;
         }
 
-        /* Warna Ikon Spesifik (copy dari daily-stats) */
         .category-expense-enhanced i.text-primary, #history-content i.text-primary { color: #4b0082 !important; }
         .category-expense-enhanced i.text-secondary, #history-content i.text-secondary { color: #6c757d !important; }
         .category-expense-enhanced i.text-danger, #history-content i.text-danger { color: #dc3545 !important; }
@@ -450,32 +396,28 @@ function applyDynamicStyles() {
         .category-expense-enhanced i.text-warning, #history-content i.text-warning { color: #fd7e14 !important; }
         .category-expense-enhanced i.text-info, #history-content i.text-info { color: #0dcaf0 !important; }
     `;
-    // Tambahkan style ini ke <head>
     document.head.appendChild(style);
 }
-// Fungsi untuk Menampilkan Welcome Screen
+
 function showWelcomeScreen(email) {
   const welcomeScreen = document.getElementById('welcome-screen');
   if (!welcomeScreen) {
-      showApp(); // Langsung tampilkan app jika welcome screen tidak ada
+      showApp(); 
       return;
   }
   welcomeScreen.style.display = 'flex';
 
-  // Jalankan animasi typewriter
   const welcomeText = document.getElementById('welcome-text');
   const fullText = "Meraih Masa Depan Sukses Bersama Beasiswa Unggulan dengan Menjadi Insan Cerdas dan Kompetitif.";
   if (welcomeText) {
-    welcomeText.textContent = ''; // Kosongkan teks sebelum animasi
+    welcomeText.textContent = ''; 
     typeWriter(welcomeText, fullText, 30, () => {
-      // Setelah teks selesai ditulis, tunggu 2 detik dan tampilkan app
       setTimeout(() => {
         welcomeScreen.style.display = 'none';
         showApp();
       }, 2000);
     });
   } else {
-      // Jika teks welcome tidak ada, langsung lanjut setelah delay
       setTimeout(() => {
         welcomeScreen.style.display = 'none';
         showApp();
@@ -483,7 +425,7 @@ function showWelcomeScreen(email) {
   }
 }
 
-// Fungsi untuk Efek Typewriter
+// bikin efek ngetik buat welcome text
 function typeWriter(element, text, speed, callback) {
   let i = 0;
   function type() {
@@ -498,90 +440,81 @@ function typeWriter(element, text, speed, callback) {
   type();
 }
 
-// BARU: Fungsi untuk Masuk Mode Fullscreen dan Rotasi (Modifikasi A)
+// full screen mode
 async function enterFullscreen(element) {
   try {
     if (element.requestFullscreen) {
       await element.requestFullscreen();
-    } else if (element.webkitRequestFullscreen) { /* Safari */
+    } else if (element.webkitRequestFullscreen) {
       await element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) { /* IE11 */
+    } else if (element.msRequestFullscreen) {
       await element.msRequestFullscreen();
     }
 
-    // Coba paksa rotasi ke landscape HANYA di HP
+    // lock rotasi ke landscape kalo di hp
     if (window.screen.orientation && window.innerWidth < 768) {
         await window.screen.orientation.lock('landscape');
     }
   } catch (err) {
-    console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+    console.error(`Error full-screen: ${err.message}`);
     showNotification("Gagal masuk mode layar penuh.", "danger");
   }
 }
 
-// BARU: Fungsi untuk Keluar Mode Fullscreen dan Rotasi (Modifikasi A)
 async function exitFullscreen() {
   try {
     if (document.exitFullscreen) {
       await document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) { /* Safari */
+    } else if (document.webkitExitFullscreen) {
       await document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) { /* IE11 */
+    } else if (document.msExitFullscreen) { 
       await document.msExitFullscreen();
     }
-    // Coba unlock rotasi
+    // balikin rotasi
     if (window.screen.orientation) {
       window.screen.orientation.unlock();
     }
   } catch (err) {
-    console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+    console.error(`Error exit full-screen: ${err.message}`);
   }
 }
 
-// BARU: Fungsi untuk Menangani Klik Tombol Fullscreen (Modifikasi A)
 function handleFullscreenClick(chartInstance) {
     const modalElement = document.getElementById('zoomModal');
     if (!modalElement || !chartInstance) return;
 
-    // Masuk fullscreen & lock orientasi saat modal ditampilkan
     modalElement.addEventListener('shown.bs.modal', async () => {
         await enterFullscreen(modalElement);
-        // Re-render chart di dalam modal setelah fullscreen agar ukurannya pas
         renderChartInZoomModal(chartInstance);
-    }, { once: true }); // Hanya trigger sekali
+    }, { once: true }); 
 
-    // Keluar fullscreen & unlock orientasi saat modal ditutup
     modalElement.addEventListener('hidden.bs.modal', async () => {
         await exitFullscreen();
-        // Hancurkan chart di modal saat ditutup
         if (zoomChartInstance instanceof Chart) {
             zoomChartInstance.destroy();
             zoomChartInstance = null;
         }
-    }, { once: true }); // Hanya trigger sekali
+    }, { once: true }); 
 
-    // Tampilkan modal (yang akan memicu listener 'shown.bs.modal')
     zoomModal.show();
 }
 
-// BARU: Fungsi untuk Merender Chart di Modal Zoom (Modifikasi A)
+// render ulang chart di dalem modal zoom
 function renderChartInZoomModal(originalChartInstance) {
   const zoomCtx = document.getElementById('zoom-chart-canvas').getContext('2d');
 
-  // Hancurkan instance chart di modal sebelumnya (jika ada)
   if (zoomChartInstance instanceof Chart) {
     zoomChartInstance.destroy();
   }
 
-  // Salin konfigurasi dari chart asli
+  // copy config chart aslinya
   const newConfig = structuredClone(originalChartInstance.config);
 
-  // Pastikan plugins ada
   if (!newConfig.options.plugins) {
     newConfig.options.plugins = {};
   }
 
-  // Tambahkan konfigurasi plugin zoom
+  // enable pan & zoom plugin
   newConfig.options.plugins.zoom = {
     pan: {
       enabled: true,
@@ -595,24 +528,17 @@ function renderChartInZoomModal(originalChartInstance) {
     }
   };
 
-  // Paksa chart agar responsif dan mengisi area modal
   newConfig.options.responsive = true;
   newConfig.options.maintainAspectRatio = false;
 
-  // Hapus onClick bawaan agar tidak memicu modal detail saat di dalam modal zoom
-  if (newConfig.options.onClick) {
-    delete newConfig.options.onClick;
-  }
-  if (newConfig.options.onHover) {
-    delete newConfig.options.onHover;
-  }
+  // matiin click/hover default pas lagi di zoom
+  if (newConfig.options.onClick) delete newConfig.options.onClick;
+  if (newConfig.options.onHover) delete newConfig.options.onHover;
 
-  // Buat chart baru di modal
   zoomChartInstance = new Chart(zoomCtx, newConfig);
 }
 
-
-// BARU: Fungsi untuk Menampilkan Modal Detail Harian (Poin C)
+// popup detail harian
 function showDailyDetailModal(date) {
   const currentUser = localStorage.getItem('currentUser');
   const currentMonth = getCurrentMonth();
@@ -620,9 +546,7 @@ function showDailyDetailModal(date) {
   const expensesKey = `expenses_${currentUser}_${currentYear}_${currentMonth}`;
   const expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
 
-  // Filter pengeluaran untuk tanggal yang dipilih
   const expensesOnDate = expenses.filter(exp => {
-    // Gunakan tanggal yang disimpan di expense, bukan tanggal hari ini
     const expDateOnly = new Date(exp.date).toLocaleDateString('id-ID');
     return expDateOnly === date;
   });
@@ -630,10 +554,10 @@ function showDailyDetailModal(date) {
   const detailList = document.getElementById('daily-detail-list');
   const detailTotal = document.getElementById('daily-detail-total');
   const modalLabel = document.getElementById('dailyDetailModalLabel');
-  if (!detailList || !detailTotal || !modalLabel) return; // Guard clause
+  if (!detailList || !detailTotal || !modalLabel) return; 
 
   modalLabel.textContent = `Detail Pengeluaran - ${date}`;
-  detailList.innerHTML = ''; // Kosongkan list
+  detailList.innerHTML = ''; 
 
   if (expensesOnDate.length === 0) {
     detailList.innerHTML = '<li class="list-group-item text-center">Tidak ada pengeluaran pada hari ini.</li>';
@@ -642,21 +566,42 @@ function showDailyDetailModal(date) {
     return;
   }
 
-  // ... (akhir dari fungsi showDailyDetailModal)
+  // group berdasar barang biar ga numpuk kalo nama & kategorinya sama
+  const groupedByItem = expensesOnDate.reduce((acc, exp) => {
+    const key = `${exp.kategori}#${exp.barang}`;
+    if (!acc[key]) {
+      acc[key] = {
+        kategori: exp.kategori,
+        barang: exp.barang,
+        amount: 0
+      };
+    }
+    acc[key].amount += exp.amount;
+    return acc;
+  }, {});
+
+  let totalAmount = 0;
+  const sortedExpenses = Object.values(groupedByItem).sort((a, b) => a.kategori.localeCompare(b.kategori));
+
+  sortedExpenses.forEach(exp => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+    li.innerHTML = `
+      <div>
+        <strong>${capitalizeFirstLetter(exp.kategori)}</strong>
+        <small class="d-block text-muted">${capitalizeFirstLetter(exp.barang)}</small>
+      </div>
+      <span>Rp${exp.amount.toLocaleString('id-ID')}</span>
+    `;
+    detailList.appendChild(li);
+    totalAmount += exp.amount;
+  });
+
+  detailTotal.textContent = `Total: Rp${totalAmount.toLocaleString('id-ID')}`;
   dailyDetailModal.show();
 }
 
-/**
- * ==========================================================
- * FUNGSI BARU: (Tambahkan Blok Ini)
- * ==========================================================
- * FUNGSI-FUNGSI BARU UNTUK SALDO & BUDGET
- */
-
-/**
- * Mengambil data saldo (Tunai & Bank) dari localStorage
- * @returns {object} - { tunai: number, bank: number }
- */
+// ambil data saldo (tunai & bank)
 function getSaldo() {
     const currentUser = localStorage.getItem('currentUser');
     if (!currentUser) return { tunai: 0, bank: 0 };
@@ -669,14 +614,9 @@ function getSaldo() {
     } catch (e) {
         console.error("Gagal parsing data saldo:", e);
     }
-    // Default jika tidak ada data atau error
     return { tunai: 0, bank: 0 };
 }
 
-/**
- * Menyimpan data saldo (Tunai & Bank) ke localStorage
- * @param {object} saldo - { tunai: number, bank: number }
- */
 function saveSaldo(saldo) {
     const currentUser = localStorage.getItem('currentUser');
     if (!currentUser) return;
@@ -689,15 +629,12 @@ function saveSaldo(saldo) {
     }
 }
 
-/**
- * Mengambil data budget bulanan dari localStorage
- * @returns {number} - Jumlah budget, atau null jika belum diatur
- */
+// ambil target budget bulanan
 function getBudget() {
     const currentUser = localStorage.getItem('currentUser');
     const currentMonthKey = `${getCurrentYear()}-${getCurrentMonth()}`;
     if (!currentUser) return null;
-    const key = `budget_${currentUser}_${currentMonthKey}`; // Budget unik per bulan
+    const key = `budget_${currentUser}_${currentMonthKey}`; 
     try {
         const data = JSON.parse(localStorage.getItem(key));
         if (data && typeof data.budget === 'number') {
@@ -706,13 +643,9 @@ function getBudget() {
     } catch (e) {
         console.error("Gagal parsing data budget:", e);
     }
-    return null; // Default jika belum diatur
+    return null; 
 }
 
-/**
- * Menyimpan data budget bulanan ke localStorage
- * @param {number} budgetAmount - Jumlah budget
- */
 function saveBudget(budgetAmount) {
     const currentUser = localStorage.getItem('currentUser');
     const currentMonthKey = `${getCurrentYear()}-${getCurrentMonth()}`;
@@ -726,10 +659,6 @@ function saveBudget(budgetAmount) {
     }
 }
 
-/**
- * Mengambil total pengeluaran untuk bulan ini
- * @returns {number} - Total pengeluaran
- */
 function getTotalPengeluaranBulanIni() {
     const currentUser = localStorage.getItem('currentUser');
     const currentMonth = getCurrentMonth();
@@ -740,13 +669,11 @@ function getTotalPengeluaranBulanIni() {
         expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
     } catch (e) {
         console.error("Gagal parsing data pengeluaran:", e);
-    }    
+    }   
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
 }
 
-/**
- * (Helper BARU) Memperbarui tampilan Saldo di Halaman Dompet
- */
+// refresh dompet view
 function updateSaldoDisplay() {
     const saldo = getSaldo();
     const saldoTunaiEl = document.getElementById('saldo-tunai-display');
@@ -755,26 +682,14 @@ function updateSaldoDisplay() {
     if (saldoTunaiEl) saldoTunaiEl.textContent = `Rp${saldo.tunai.toLocaleString('id-ID')}`;
     if (saldoBankEl) saldoBankEl.textContent = `Rp${saldo.bank.toLocaleString('id-ID')}`;
 
-    // Update juga info saldo di modal transfer
     const transferSaldoBankEl = document.getElementById('transfer-saldo-bank');
     if (transferSaldoBankEl) transferSaldoBankEl.textContent = `Rp${saldo.bank.toLocaleString('id-ID')}`;
 }
 
-
-/**
- * (Helper BARU) Memperbarui tampilan Widget Budget di Halaman Dompet
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * (Helper BARU) Memperbarui tampilan Widget Budget di Halaman Dompet
- * (DIMODIFIKASI untuk mengisi Dropdown Statistik)
- */
+// hitung sisa budget dan render progress bar
 function updateBudgetDisplay() {
     const budget = getBudget();
     
-    // Referensi ke elemen HTML baru
     const budgetSummaryHeader = document.getElementById('budget-summary-header');
     const budgetStatsContent = document.getElementById('budget-stats-content');
     const budgetSisaEl = document.getElementById('budget-sisa');
@@ -782,19 +697,11 @@ function updateBudgetDisplay() {
     const budgetPercentageEl = document.getElementById('budget-percentage');
     const btnAturBudget = document.getElementById('btn-atur-budget');
 
-    if (!budgetSummaryHeader || !budgetStatsContent || !budgetSisaEl || !budgetProgressEl || !budgetPercentageEl || !btnAturBudget) {
-        console.error("Elemen widget budget baru tidak ditemukan!");
-        return;
-    }
+    if (!budgetSummaryHeader || !budgetStatsContent || !budgetSisaEl || !budgetProgressEl || !budgetPercentageEl || !btnAturBudget) return;
     
-    // ==========================================================
-    // ===== PERBAIKAN: PANGGIL FUNGSI BAR BARU (Poin 4) =====
-    // ==========================================================
-    updateExpenditureVsSaldoBar(); // Panggil update bar pengeluaran vs saldo
-    // ==========================================================
+    updateExpenditureVsSaldoBar(); 
 
     if (!budget) {
-        // Jika budget BELUM diatur
         if (budgetSisaEl) budgetSisaEl.textContent = "Budget belum diatur";
         if (budgetProgressEl) {
             budgetProgressEl.style.width = '0%';
@@ -807,19 +714,14 @@ function updateBudgetDisplay() {
         return;
     }
 
-    // --- Jika budget SUDAH diatur, hitung semua statistik ---
-    
-    // 1. Ambil Data Dasar
     const saldo = getSaldo();
-    const { expenses, pengeluaranTunai, pengeluaranBank } = getMonthlyExpenseDetails(); // Gunakan helper baru
+    const { expenses, pengeluaranTunai, pengeluaranBank } = getMonthlyExpenseDetails(); 
     const totalPengeluaran = pengeluaranTunai + pengeluaranBank;
     
-    // 3. Hitung Statistik Utama
     const sisaBudget = budget - totalPengeluaran;
     const persentaseTerpakai = (budget > 0) ? (totalPengeluaran / budget) * 100 : 0;
     const persentaseTampil = Math.min(100, persentaseTerpakai);
 
-    // 4. Hitung Statistik Detail
     const today = new Date();
     const hariDiBulan = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const hariTelahLewat = today.getDate();
@@ -831,19 +733,16 @@ function updateBudgetDisplay() {
     const totalTunaiDimiliki = saldo.tunai + pengeluaranTunai;
     const persentasePengeluaranTunai = (totalTunaiDimiliki > 0) ? (pengeluaranTunai / totalTunaiDimiliki) * 100 : 0;
 
-    // --- Update UI ---
-
-    // 1. Update Header Ringkas (<summary>)
     if (budgetSisaEl) {
         budgetSisaEl.textContent = sisaBudget >= 0 
             ? `Sisa: Rp${sisaBudget.toLocaleString('id-ID')}`
             : `Lebih: Rp${Math.abs(sisaBudget).toLocaleString('id-ID')}`;
         budgetSisaEl.style.color = sisaBudget >= 0 ? '#6c757d' : '#dc3545';
     }
+    
     if (budgetPercentageEl) budgetPercentageEl.textContent = `${persentaseTerpakai.toFixed(0)}%`;
-    if (btnAturBudget) btnAturBudget.textContent = "Atur/Edit Budget"; // Ubah teks tombol
+    if (btnAturBudget) btnAturBudget.textContent = "Atur/Edit Budget"; 
 
-    // Atur style progress bar
     if (budgetProgressEl) {
         budgetProgressEl.style.width = `${persentaseTampil}%`;
         budgetProgressEl.classList.remove('color-warn', 'color-danger');
@@ -854,7 +753,6 @@ function updateBudgetDisplay() {
         }
     }
     
-    // 2. Update Statistik Detail (Dropdown Content)
     budgetStatsContent.innerHTML = `
         <ul>
             <li>
@@ -892,6 +790,7 @@ function updateBudgetDisplay() {
         </ul>
     `;
 }
+
 function updateSaldoInfoDiForm() {
     const saldo = getSaldo();
     const tunaiInfoEl = document.getElementById('sumber-tunai-info');
@@ -901,34 +800,30 @@ function updateSaldoInfoDiForm() {
     if (bankInfoEl) bankInfoEl.textContent = `Sisa: Rp${saldo.bank.toLocaleString('id-ID')}`;
 }
 
-/**
- * (Helper BARU) Cek dan tampilkan peringatan budget 70%
- */
+// cek klo budget udh mepet 70%
 function checkBudgetAlert() {
     const currentUser = localStorage.getItem('currentUser');
     const currentMonthKey = `${getCurrentYear()}-${getCurrentMonth()}`;
     const alertKey = `budgetAlert_${currentUser}_${currentMonthKey}`;
 
-    // Cek apakah alert sudah ditampilkan bulan ini
     if (localStorage.getItem(alertKey)) {
         budgetAlertShownThisMonth = true;
         return;
     }
 
     const budget = getBudget();
-    if (!budget || budget === 0) return; // Tidak ada budget, tidak ada alert
+    if (!budget || budget === 0) return; 
 
     const totalPengeluaran = getTotalPengeluaranBulanIni();
     const persentaseTerpakai = (totalPengeluaran / budget) * 100;
 
     if (persentaseTerpakai >= 70 && !budgetAlertShownThisMonth) {
         const sisaBudget = budget - totalPengeluaran;
-        const sisaSaldoTunai = getSaldo().tunai; // Ambil sisa tunai
+        const sisaSaldoTunai = getSaldo().tunai; 
         const today = new Date();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const sisaHari = Math.max(0, daysInMonth - today.getDate()); // Sisa hari
+        const sisaHari = Math.max(0, daysInMonth - today.getDate()); 
 
-        // Pesan peringatan sesuai permintaan
         const pesan = `Pengeluaranmu bulan ini sudah <strong>${persentaseTerpakai.toFixed(0)}%</strong>.
                   <br><br>
                      Saat ini anda hanya memiliki sisa uang sebesar <strong>Rp${sisaSaldoTunai.toLocaleString('id-ID')}</strong> (di dompet tunai) yang digunakan selama <strong>${sisaHari} hari</strong> lagi.
@@ -937,133 +832,46 @@ function checkBudgetAlert() {
                      <br><br>
                      Yuk, lebih hemat!`;
 
-        // Tampilkan modal alert
-        showInfoModal(
-            "⚠️ Peringatan Budget!",
-            pesan
-        );
+        showInfoModal("⚠️ Peringatan Budget!", pesan);
 
-        // Tandai bahwa alert sudah muncul bulan ini
         budgetAlertShownThisMonth = true;
         localStorage.setItem(alertKey, 'true');
     }
 }
 
-/**
- * Menampilkan animasi transfer internal
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Menampilkan animasi transfer internal
- * (DIMODIFIKASI untuk mengubah teks sesuai permintaan)
- */
+// popup overlay transfer uang
 function showTransferAnimation() {
     const overlay = document.getElementById('transfer-animation');
     if (overlay) {
-        
-        // BARU: Ambil elemen teks dan ubah isinya
         const textElement = overlay.querySelector('.transfer-animation-text');
         if (textElement) {
-            textElement.textContent = "Mengirim ke dompet anda..."; // Teks sesuai permintaan
+            textElement.textContent = "Mengirim ke dompet anda..."; 
         }
         
         overlay.style.display = 'flex';
         
-        // Sembunyikan setelah animasi selesai (CSS-nya 2 detik)
         setTimeout(() => {
             overlay.style.display = 'none';
-            // Opsional: Kembalikan teks ke default jika perlu
             if (textElement) {
                  textElement.textContent = "Mengirim uang ke dompet..."; 
             }
-        }, 2500); // Beri sedikit buffer
+        }, 2500); 
     }
 }
 
-  // Kelompokkan berdasarkan barang dalam kategori
-  const groupedByItem = expensesOnDate.reduce((acc, exp) => {
-    const key = `${exp.kategori}#${exp.barang}`;
-    if (!acc[key]) {
-      acc[key] = {
-        kategori: exp.kategori,
-        barang: exp.barang,
-        amount: 0
-      };
-    }
-    acc[key].amount += exp.amount;
-    return acc;
-  }, {});
-
-  let totalAmount = 0;
-
-  // Urutkan berdasarkan kategori
-  const sortedExpenses = Object.values(groupedByItem).sort((a, b) => a.kategori.localeCompare(b.kategori));
-
-  sortedExpenses.forEach(exp => {
-    const li = document.createElement('li');
-    li.className = 'list-group-item';
-    li.innerHTML = `
-      <div>
-        <strong>${capitalizeFirstLetter(exp.kategori)}</strong>
-        <small class="d-block text-muted">${capitalizeFirstLetter(exp.barang)}</small>
-      </div>
-      <span>Rp${exp.amount.toLocaleString('id-ID')}</span>
-    `;
-    detailList.appendChild(li);
-    totalAmount += exp.amount;
-  });
-
-  detailTotal.textContent = `Total: Rp${totalAmount.toLocaleString('id-ID')}`;
-  dailyDetailModal.show();
-
-
-// Fungsi untuk Inisialisasi Aplikasi
-// Fungsi untuk Inisialisasi Aplikasi
-// Fungsi untuk Inisialisasi Aplikasi
-// Fungsi untuk Inisialisasi Aplikasi
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * (DIMODIFIKASI: Mendaftarkan 'TimeScale' agar sumbu-X anomali muncul)
- */
+// Setup awal waktu buka app
 function initializeApp() {
-  // ==========================================================
-  // ===== PERBAIKAN: DAFTARKAN JUGA 'TimeScale' =====
-  // ==========================================================
-  // Daftarkan Plugin Zoom DAN Skala Waktu (TimeScale)
-  // TimeScale diperlukan untuk grafik anomali (type: 'time')
   Chart.register(ChartZoom, Chart.TimeScale);
-  // ==========================================================
 
-  // Inisialisasi Modal Utama
   zoomModal = new bootstrap.Modal(document.getElementById('zoomModal'));
   dailyDetailModal = new bootstrap.Modal(document.getElementById('dailyDetailModal'));
   
-  // Inisialisasi Modal Dompet, Pemasukan, dan Transfer
-  if (document.getElementById('budgetModal')) {
-      budgetModal = new bootstrap.Modal(document.getElementById('budgetModal'));
-  }
-  if (document.getElementById('pemasukanModal')) {
-      pemasukanModal = new bootstrap.Modal(document.getElementById('pemasukanModal'));
-  }
-  if (document.getElementById('transferModal')) {
-      transferModal = new bootstrap.Modal(document.getElementById('transferModal'));
-  }
+  if (document.getElementById('budgetModal')) budgetModal = new bootstrap.Modal(document.getElementById('budgetModal'));
+  if (document.getElementById('pemasukanModal')) pemasukanModal = new bootstrap.Modal(document.getElementById('pemasukanModal'));
+  if (document.getElementById('transferModal')) transferModal = new bootstrap.Modal(document.getElementById('transferModal'));
+  if (document.getElementById('infoModal')) infoModalInstance = new bootstrap.Modal(document.getElementById('infoModal')); 
+  if (document.getElementById('customConfirmModal')) customConfirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
   
-  // Inisialisasi Info Modal
-  if (document.getElementById('infoModal')) { 
-      infoModalInstance = new bootstrap.Modal(document.getElementById('infoModal')); 
-  }
-
-  // Inisialisasi Modal Konfirmasi Kustom
-  if (document.getElementById('customConfirmModal')) {
-      customConfirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
-  }
-  
-  // Listener untuk tombol "Ya" di modal konfirmasi
   document.getElementById('custom-confirm-yes-btn')?.addEventListener('click', () => {
       if (typeof onConfirmCallback === 'function') {
           onConfirmCallback();
@@ -1072,7 +880,7 @@ function initializeApp() {
       onConfirmCallback = () => {};
   });
 
-  // Attach Event Listeners untuk Menu
+  // routing menu
   document.getElementById('menu-add-expense')?.addEventListener('click', () => showSection('add-expense-section'));
   document.getElementById('menu-daily-expense')?.addEventListener('click', () => showSection('daily-expense-section'));
   document.getElementById('menu-category-expense')?.addEventListener('click', () => showSection('category-expense-section'));
@@ -1081,24 +889,22 @@ function initializeApp() {
   document.getElementById('menu-history-expense')?.addEventListener('click', () => showSection('history-expense-section'));
   document.getElementById('menu-dompet')?.addEventListener('click', () => showSection('dompet-section'));
 
-  // Back to Dashboard Buttons
   document.querySelectorAll('[id^="back-to-dashboard"], [id^="back-dompet-to-dashboard"], #back-analisis-to-dashboard').forEach(button => {
     button?.addEventListener('click', () => showSection('dashboard-section'));
   });
+  
   document.getElementById('back-anomali-to-analisis')?.addEventListener('click', () => showSection('analisis-section'));
   document.getElementById('back-prediksi-to-analisis')?.addEventListener('click', () => showSection('analisis-section'));
   
-  // Listener Form Saldo & Budget
   document.getElementById('budget-form')?.addEventListener('submit', handleSaveBudget);
   document.getElementById('pemasukan-form')?.addEventListener('submit', handleTambahPemasukan);
   document.getElementById('transfer-form')?.addEventListener('submit', handleTransferInternal);
   
-  // Listener Reset Saldo & Budget
   document.getElementById('btn-reset-tunai')?.addEventListener('click', handleResetTunai);
   document.getElementById('btn-reset-bank')?.addEventListener('click', handleResetBank);
   document.getElementById('btn-reset-budget')?.addEventListener('click', handleResetBudget);
   
-  // Listener Dropdown Bar Pengeluaran
+  // dropdown toggle buat bar perbandingan
   const expSaldoDropdown = document.querySelector('.exp-saldo-dropdown .dropdown-menu');
   if (expSaldoDropdown) {
       expSaldoDropdown.addEventListener('click', (e) => {
@@ -1119,61 +925,43 @@ function initializeApp() {
       });
   }
 
-  // Listener Reset Filter Bar
   document.getElementById('btn-reset-exp-saldo')?.addEventListener('click', handleResetExpSaldoFilter);
-  
-  // Listener Reset Data Pengeluaran Bulanan
-  document.getElementById('btn-reset-monthly-expenses')?.addEventListener('click', handleResetMonthlyExpenses);
+  // document.getElementById('btn-reset-monthly-expenses')?.addEventListener('click', handleResetMonthlyExpenses);
 
-  // Listener untuk Filter Anomali Kategori
   document.getElementById('anomali-kategori-filter')?.addEventListener('change', filterAnomalyChart);
-
-  // Logout Button
   document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
 
-  // Handle Add Expense Form Submission
   const expenseForm = document.getElementById('expense-form');
   if (expenseForm) expenseForm.addEventListener('submit', handleAddExpense);
 
-  // Handle Print Form Submission
   const printForm = document.getElementById('print-expense-form');
   if (printForm) printForm.addEventListener('submit', handlePrintExpense);
 
-  // Listener Tombol Menu Analisis
   document.getElementById('menu-analisis')?.addEventListener('click', () => showSection('analisis-section'));
   document.getElementById('goto-anomali')?.addEventListener('click', () => showSection('anomali-detail-section'));
   document.getElementById('goto-prediksi')?.addEventListener('click', () => showSection('prediksi-detail-section'));
   
-  // Listener daftar pengeluaran (ul#expenses-ul)
   const expensesUl = document.getElementById('expenses-ul');
   if (expensesUl) {
       expensesUl.removeEventListener('click', handleExpenseListClick);
       expensesUl.addEventListener('click', handleExpenseListClick);
   }
 
-  // Initialize History & Print
   initializeHistoryYearOptions();
   initializePrintYearOptions();
-
-  // Set default Tanggal & Jam
   setDefaultDateTime();
-
-  // Render Initial
   renderDashboard();
   
-  // Handle Kategori Dropdown
   loadSavedCategories();
   initializeDropdown('kategori-button', 'category-options', 'kategori-selected', 'add-new-category', 'add-category-input', 'new-category-input', 'save-new-category', 'category');
 
-  // Initialize Tips Modal
   if (document.getElementById('tipsModal')) {
     new bootstrap.Modal(document.getElementById('tipsModal'));
   }
 
-  // Initialize Category Expense
   initializeCategoryExpenseEnhanced();
 
-  // Event listener tombol chart (avg, animate, fullscreen)
+  // toggle garis rata2
   const toggleAvgButton = document.getElementById('toggle-average-line');
   if (toggleAvgButton) {
       toggleAvgButton.addEventListener('click', (e) => {
@@ -1188,10 +976,12 @@ function initializeApp() {
           }
       });
   }
+  
   const animateButton = document.getElementById('animate-daily-chart');
   if (animateButton) {
       animateButton.addEventListener('click', animateDailyChart);
   }
+  
   document.addEventListener('click', (e) => {
       const fullscreenBtn = e.target.closest('.fullscreen-button');
       if (fullscreenBtn) {
@@ -1210,10 +1000,9 @@ function initializeApp() {
       }
   });
 
-  // Terapkan perbaikan visual
   applyDynamicStyles();
 }
-// BARU: Fungsi untuk set default tanggal dan jam (Poin D)
+
 function setDefaultDateTime() {
     const dateInput = document.getElementById('expense-date');
     const timeInput = document.getElementById('expense-time');
@@ -1231,7 +1020,7 @@ function setDefaultDateTime() {
     }
 }
 
-// BARU: Fungsi generik untuk inisialisasi dropdown (Kategori & Sumber Dana)
+// fungsi general buat dropdown kaya kategori
 function initializeDropdown(buttonId, optionsId, selectedInputId, addNewBtnId, addInputContainerId, newInputId, saveBtnId, type) {
     const dropdownButton = document.getElementById(buttonId);
     const optionsContainer = document.getElementById(optionsId);
@@ -1242,16 +1031,13 @@ function initializeDropdown(buttonId, optionsId, selectedInputId, addNewBtnId, a
     const saveButton = document.getElementById(saveBtnId);
 
     if (!dropdownButton || !optionsContainer || !selectedInput || !addNewButton || !addInputContainer || !newInput || !saveButton) {
-        // console.error(`Missing elements for dropdown type: ${type}`);
-        return; // Guard clause jika ada elemen yang hilang
+        return; 
     }
     
-    // Toggle dropdown
     dropdownButton.addEventListener('click', () => {
         optionsContainer.classList.toggle('show');
     });
 
-    // Handle option selection (delegated)
     optionsContainer.addEventListener('click', (e) => {
         const targetButton = e.target.closest(`button[data-${type}]`);
         if (targetButton) {
@@ -1262,19 +1048,16 @@ function initializeDropdown(buttonId, optionsId, selectedInputId, addNewBtnId, a
                 selectedInput.value = selectedValue;
                 dropdownButton.innerHTML = `${capitalizeFirstLetter(selectedValue)} <i class="fas fa-chevron-down float-end"></i>`;
                 optionsContainer.classList.remove('show');
-                addInputContainer.style.display = 'none'; // Sembunyikan input tambah
-                newInput.value = ''; // Kosongkan input tambah
+                addInputContainer.style.display = 'none'; 
+                newInput.value = ''; 
             }
         }
     });
 
-    // Handle save new item
     saveButton.addEventListener('click', () => {
         const newValue = newInput.value.trim();
         if (newValue) {
             const lowerCaseValue = newValue.toLowerCase();
-            
-            // Cek duplikasi sebelum menambah
             const existingOptions = optionsContainer.querySelectorAll(`button[data-${type}]`);
             let isDuplicate = false;
             existingOptions.forEach(opt => {
@@ -1288,7 +1071,6 @@ function initializeDropdown(buttonId, optionsId, selectedInputId, addNewBtnId, a
                 return;
             }
             
-            // Tambahkan item baru ke dropdown
             const newButton = document.createElement('button');
             newButton.type = 'button';
             newButton.setAttribute(`data-${type}`, lowerCaseValue);
@@ -1296,11 +1078,9 @@ function initializeDropdown(buttonId, optionsId, selectedInputId, addNewBtnId, a
             optionsContainer.insertBefore(newButton, addNewButton);
 
             if (type === 'category') {
-                console.log(`Saving new category: ${newValue}`); // Log
-                saveCategory(newValue); // Simpan dengan case asli
+                saveCategory(newValue); 
             }
 
-            // Set item baru sebagai yang dipilih
             selectedInput.value = lowerCaseValue;
             dropdownButton.innerHTML = `${capitalizeFirstLetter(newValue)} <i class="fas fa-chevron-down float-end"></i>`;
             optionsContainer.classList.remove('show');
@@ -1311,23 +1091,15 @@ function initializeDropdown(buttonId, optionsId, selectedInputId, addNewBtnId, a
     });
 }
 
-/**
- * ==========================================================
- * FUNGSI BARU: (Tambahkan Fungsi Ini)
- * ==========================================================
- * BARU: Menangani Reset Filter Bar Pengeluaran
- */
 function handleResetExpSaldoFilter() {
     const button = document.getElementById('expenditure-saldo-select');
     const dropdownMenu = document.querySelector('.exp-saldo-dropdown .dropdown-menu');
     
     if (!button || !dropdownMenu) return;
 
-    // 1. Set state & teks tombol ke default
     button.setAttribute('data-current-value', EXP_SALDO_DEFAULT_VIEW);
-    button.textContent = "Total Keluar vs Tunai"; // Teks default
+    button.textContent = "Total Keluar vs Tunai"; 
     
-    // 2. Update kelas 'active' di dropdown
     dropdownMenu.querySelectorAll('.dropdown-item').forEach(item => {
         item.classList.remove('active');
         if (item.getAttribute('data-value') === EXP_SALDO_DEFAULT_VIEW) {
@@ -1335,35 +1107,29 @@ function handleResetExpSaldoFilter() {
         }
     });
     
-    // 3. Render ulang bar
     updateExpenditureVsSaldoBar();
-    
     showNotification("Filter bar telah direset.", "success");
 }
 
-// ===== KODE BARU: Fungsi untuk menyimpan Kategori ke localStorage =====
 function saveCategory(categoryValue) {
     const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) return; // Jangan simpan jika tidak ada user
-    const key = `categories_${currentUser}`; // Kunci unik per user
+    if (!currentUser) return; 
+    const key = `categories_${currentUser}`; 
     let savedCategories = [];
     try {
-        // Coba ambil data yang sudah ada, pastikan itu array
         const existingData = localStorage.getItem(key);
         savedCategories = existingData ? JSON.parse(existingData) : [];
         if (!Array.isArray(savedCategories)) savedCategories = [];
     } catch (error) {
         console.error("Error parsing saved categories:", error);
-        savedCategories = []; // Reset jika error
+        savedCategories = []; 
     }
 
-    // Pastikan unik sebelum menyimpan (case-insensitive)
     const lowerCaseValue = categoryValue.toLowerCase();
     if (!savedCategories.some(cat => cat.toLowerCase() === lowerCaseValue)) {
-        savedCategories.push(categoryValue); // Simpan dengan case asli
+        savedCategories.push(categoryValue); 
         try {
             localStorage.setItem(key, JSON.stringify(savedCategories));
-            console.log("Saved categories:", savedCategories); // Log untuk debug
         } catch (e) {
             console.error("Error saving categories to localStorage:", e);
             showNotification("Gagal menyimpan kategori baru.", "danger");
@@ -1371,10 +1137,9 @@ function saveCategory(categoryValue) {
     }
 }
 
-// ===== KODE BARU: Fungsi untuk memuat Kategori dari localStorage =====
 function loadSavedCategories() {
     const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) return; // Jangan load jika tidak ada user
+    if (!currentUser) return; 
 
     const key = `categories_${currentUser}`;
     let savedCategories = [];
@@ -1384,72 +1149,48 @@ function loadSavedCategories() {
         if (!Array.isArray(savedCategories)) savedCategories = [];
     } catch (error) {
         console.error("Error parsing saved categories:", error);
-        savedCategories = []; // Reset jika error
+        savedCategories = [];
     }
 
     const optionsContainer = document.getElementById('category-options');
     const addNewButton = document.getElementById('add-new-category');
 
-    if (!optionsContainer || !addNewButton) {
-        console.error("Category options container or add new button not found during load.");
-        return; // Pastikan elemen ada
-    }
+    if (!optionsContainer || !addNewButton) return; 
 
-    // Dapatkan daftar kategori default dari HTML untuk mencegah duplikasi
     const defaultCategories = new Set();
     optionsContainer.querySelectorAll('button[data-category]:not(#add-new-category)')
         .forEach(btn => defaultCategories.add(btn.getAttribute('data-category')));
 
-    console.log("Loading saved categories:", savedCategories); // Log untuk debug
     savedCategories.forEach(category => {
         const lowerCaseCategory = category.toLowerCase();
-        // Hanya tambahkan jika BUKAN default DAN belum ada di DOM
         if (!defaultCategories.has(lowerCaseCategory) && !optionsContainer.querySelector(`button[data-category="${lowerCaseCategory}"]`)) {
-            console.log(`Adding saved category to DOM: ${category}`); // Log penambahan
             const newButton = document.createElement('button');
             newButton.type = 'button';
             newButton.setAttribute('data-category', lowerCaseCategory);
-            newButton.textContent = capitalizeFirstLetter(category); // Tampilkan dengan case asli
-            // Sisipkan sebelum tombol "Tambah Kategori Baru"
+            newButton.textContent = capitalizeFirstLetter(category); 
             optionsContainer.insertBefore(newButton, addNewButton);
-        } else {
-             console.log(`Skipping duplicate/default category: ${category}`); // Log jika duplikat
-        }
+        } 
     });
 }
 
-// BARU: Fungsi untuk menyimpan Sumber Dana ke localStorage (Poin D)
-// BARU: Fungsi untuk memuat Sumber Dana dari localStorage (Poin D)
-
-// Fungsi untuk Menampilkan Section yang Dipilih
-// Fungsi untuk Menampilkan Section yang Dipilih
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Menampilkan Section yang Dipilih
- * (DIMODIFIKASI untuk Saldo & Budget)
- */
 function showSection(sectionId) {
-  console.log(`Navigating to section: ${sectionId}`);
   document.querySelectorAll('.section').forEach(section => {
     section.classList.toggle('active', section.id === sectionId);
   });
 
-  // Reset flag data analisis jika kembali ke dashboard atau sub-menu
+  // clear cache pas pindah modul analisis/dashboard
   if (sectionId === 'dashboard-section' || sectionId === 'analisis-section') {
       analysisDataLoaded = false;
-      allUserExpensesCache = []; // Kosongkan cache
-      resetAnalysisViews(); // Panggil fungsi reset (ada di Bagian 3)
+      allUserExpensesCache = []; 
+      resetAnalysisViews(); 
   }
   
-  // Perbarui UI dinamis berdasarkan section
   switch (sectionId) {
     case 'dashboard-section':
-      renderDashboard(); // Update saldo & budget saat kembali ke dashboard
+      renderDashboard(); 
       break;
-    case 'dompet-section': // BARU
-      renderDompetPage(); // Update saldo & budget di halaman dompet
+    case 'dompet-section': 
+      renderDompetPage(); 
       break;
     case 'daily-expense-section':
       renderDailyExpenseChart();
@@ -1460,12 +1201,10 @@ function showSection(sectionId) {
       break;
     case 'history-expense-section':
       initializeHistoryYearOptions();
-      // Kosongkan konten riwayat saat pindah halaman
       const historyContent = document.getElementById('history-content');
       if (historyContent) {
           historyContent.innerHTML = '<p class="text-muted">Pilih tahun dan bulan.</p>';
       }
-      // Sembunyikan tombol ekspor (akan muncul saat data di-load)
       const exportButtons = document.getElementById('history-export-buttons');
       if (exportButtons) exportButtons.style.display = 'none';
       break;
@@ -1475,23 +1214,21 @@ function showSection(sectionId) {
     case 'add-expense-section':
       renderExpensesList();
       loadSavedCategories();
-      updateSaldoInfoDiForm(); // BARU: Tampilkan sisa saldo di form
+      updateSaldoInfoDiForm(); 
       break;
     case 'analisis-section':
-      // Tidak perlu load data di sub-menu
       break;
     case 'anomali-detail-section':
-      loadAndRunAnomalyDetection(); // Panggil fungsi (ada di Bagian 3)
+      loadAndRunAnomalyDetection(); 
       break;
     case 'prediksi-detail-section':
-      loadAndSetupPrediction(); // Panggil fungsi (ada di Bagian 3)
+      loadAndSetupPrediction(); 
       break;
   }
   
   toggleLogoutButton(sectionId);
 }
 
-// Fungsi untuk Menampilkan atau Menyembunyikan Tombol Logout
 function toggleLogoutButton(sectionId) {
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
@@ -1503,29 +1240,15 @@ function toggleLogoutButton(sectionId) {
   }
 }
 
-// Fungsi untuk Menangani Logout
 function handleLogout() {
-  showNotification('Keluar dari akun...', 'success'); // Notifikasi keluar
+  showNotification('Keluar dari akun...', 'success'); 
   setTimeout(() => {
     localStorage.removeItem('currentUser');
     location.reload();
-  }, 2000); // Delay 2 detik sebelum logout
+  }, 2000); 
 }
 
-// MODIFIKASI: Fungsi untuk Menangani Penambahan Pengeluaran (Poin D)
-// MODIFIKASI: Fungsi untuk Menangani Penambahan Pengeluaran (TANPA SUMBER DANA)
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Menangani Penambahan Pengeluaran (DIMODIFIKASI DENGAN SUMBER PEMBAYARAN)
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Menangani Penambahan Pengeluaran (DIMODIFIKASI DENGAN SUMBER PEMBAYARAN)
- */
+// handle form tambah pengeluaran (cek saldo dll)
 function handleAddExpense(e) {
   e.preventDefault();
   const dateInput = document.getElementById('expense-date');
@@ -1535,11 +1258,9 @@ function handleAddExpense(e) {
   const kategoriInput = document.getElementById('kategori-selected');
   const currentUser = localStorage.getItem('currentUser');
   
-  // BARU: Ambil sumber pembayaran
   const sumberPembayaranEl = document.querySelector('input[name="sumber-pembayaran"]:checked');
   
   if (!dateInput || !timeInput || !barangInput || !amountInput || !kategoriInput || !currentUser || !sumberPembayaranEl) {
-      console.error("Missing required expense form elements.");
       showNotification('Terjadi kesalahan pada form. Pastikan semua terisi.', 'danger');
       return;
   }
@@ -1549,12 +1270,11 @@ function handleAddExpense(e) {
   const barang = barangInput.value.trim();
   let amount = parseFloat(amountInput.value.trim());
   const kategori = kategoriInput.value.trim();
-  const sumberPembayaran = sumberPembayaranEl.value; // 'tunai' atau 'bank'
+  const sumberPembayaran = sumberPembayaranEl.value; 
 
-  // Validasi input
   if (barang && !isNaN(amount) && amount > 0 && kategori && tanggal && jam && sumberPembayaran) {
     
-    // BARU: Validasi Saldo Cukup
+    // pastiin duitnya ada
     let saldo = getSaldo();
     if (sumberPembayaran === 'tunai' && amount > saldo.tunai) {
         showNotification("Gagal! Saldo Dompet (Tunai) Anda tidak mencukupi.", "danger");
@@ -1573,17 +1293,15 @@ function handleAddExpense(e) {
          return;
     }
 
-    // Buat objek expense (BARU: tambahkan sumber)
     const expense = {
       id: Date.now(),
       barang,
       kategori,
       amount: amount,
       date: expenseDate.toISOString(),
-      sumber: sumberPembayaran // Simpan sumber pembayarannya
+      sumber: sumberPembayaran 
     };
 
-    // Simpan data pengeluaran
     const expenseMonth = expenseDate.getMonth() + 1;
     const expenseYear = expenseDate.getFullYear();
     const expensesKey = `expenses_${currentUser}_${expenseYear}_${expenseMonth}`;
@@ -1592,62 +1310,49 @@ function handleAddExpense(e) {
         expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
         if (!Array.isArray(expenses)) expenses = [];
     } catch (error) {
-        console.error("Error parsing expenses from localStorage:", error);
         expenses = [];
     }
     expenses.push(expense);
+    
     try {
         localStorage.setItem(expensesKey, JSON.stringify(expenses));
     } catch (error) {
-        console.error("Error saving expenses to localStorage:", error);
         showNotification('Gagal menyimpan pengeluaran.', 'danger');
         return;
     }
 
-    // BARU: Kurangi Saldo
+    // potong saldo
     if (sumberPembayaran === 'tunai') {
         saldo.tunai -= amount;
     } else {
         saldo.bank -= amount;
     }
-    saveSaldo(saldo); // Simpan saldo baru
+    saveSaldo(saldo); 
 
-    // Reset form
-    // showNotification('Pengeluaran berhasil ditambahkan!', 'success'); // Notifikasi dipindah ke bawah
+    // reset
     document.getElementById('expense-form').reset();
     document.getElementById('kategori-button').innerHTML = `Pilih Kategori <i class="fas fa-chevron-down float-end"></i>`;
     setDefaultDateTime();
-    updateSaldoInfoDiForm(); // Update info sisa saldo di form
+    updateSaldoInfoDiForm(); 
 
-    // =================================================================
-    // ===== PERBAIKAN: LOGIKA UNTUK NOTIFIKASI & RENDER ULANG LIST =====
-    // =================================================================
-    // Cek apakah data yang baru dimasukkan adalah untuk bulan & tahun ini
+    // nampilin notif tergantung ini data bulan ini apa bukan
     if (expenseMonth === getCurrentMonth() && expenseYear === getCurrentYear()) {
-        // Jika ya, tampilkan notifikasi standar DAN render ulang daftar di halaman ini
         showNotification('Pengeluaran berhasil ditambahkan!', 'success');
         renderExpensesList();
     } else {
-        // Jika tidak (misal, input data bulan lalu), beri notifikasi khusus
-        // Daftar TIDAK di-render ulang, karena daftar ini hanya untuk bulan ini
         const monthName = getMonthName(expenseMonth);
         showNotification(`Data disimpan di Riwayat (Bulan ${monthName} ${expenseYear}).`, 'success');
     }
-    // =================================================================
     
-    // Update data di halaman lain
     updateCategoryDropdownOptions();
     populateCategoryExpenseMonthOptions();
     
-    // Perbarui UI Dashboard/Dompet jika sedang dilihat
     const activeSection = document.querySelector('.section.active')?.id;
     if (activeSection === 'dashboard-section') renderDashboard();
     if (activeSection === 'dompet-section') renderDompetPage();
-    // Cek budget
     checkBudgetAlert();
 
   } else {
-    // Pesan error
     let errorMessage = 'Silakan isi semua bidang dengan benar.';
     if (isNaN(amount) || amount <= 0) errorMessage = 'Jumlah pengeluaran harus berupa angka positif.';
     else if (!kategori) errorMessage = 'Kategori belum dipilih.';
@@ -1655,41 +1360,28 @@ function handleAddExpense(e) {
     showNotification(errorMessage, 'warning');
   }
 }
-// ===== FUNGSI BARU: Handler untuk klik di dalam daftar pengeluaran =====
+
 function handleExpenseListClick(e) {
-    // Cek apakah yang diklik adalah ikon toggle tanggal
     const toggleIcon = e.target.closest('.toggle-category');
     if (toggleIcon) {
-        const dateLi = toggleIcon.closest('li'); // Cari header tanggal (li) terdekat
+        const dateLi = toggleIcon.closest('li'); 
         if (dateLi) {
-            const subUl = dateLi.nextElementSibling; // Cari sub-list (ul) setelahnya
+            const subUl = dateLi.nextElementSibling; 
             if (subUl && subUl.tagName === 'UL') {
-                subUl.classList.toggle('d-none'); // Tampilkan/sembunyikan
-                dateLi.classList.toggle('expanded'); // Toggle class 'expanded' di header
-                toggleIcon.classList.toggle('fa-chevron-down'); // Toggle ikon
+                subUl.classList.toggle('d-none'); 
+                dateLi.classList.toggle('expanded'); 
+                toggleIcon.classList.toggle('fa-chevron-down'); 
                 toggleIcon.classList.toggle('fa-chevron-up');
-            } else {
-                console.warn("Sub-list tidak ditemukan setelah header tanggal.");
-            }
+            } 
         }
-    }
-    // Cek apakah yang diklik adalah tombol hapus
-    else {
+    } else {
         const deleteButton = e.target.closest('.expense-delete-btn');
         if (deleteButton) {
-            handleDeleteExpenseById(e); // Panggil fungsi hapus yang sudah ada
+            handleDeleteExpenseById(e); 
         }
     }
 }
-// ===================================================================
 
-// Fungsi untuk Merender Daftar Pengeluaran (di hal 'Tambah Pengeluaran')
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Merender Daftar Pengeluaran (Menambahkan Ikon Sumber Pembayaran)
- */
 function renderExpensesList() {
   const currentUser = localStorage.getItem('currentUser');
   const currentMonth = getCurrentMonth();
@@ -1699,28 +1391,28 @@ function renderExpensesList() {
   const expensesUl = document.getElementById('expenses-ul');
   if (!expensesUl) return;
   expensesUl.innerHTML = '';
+  
   expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
   const groupedByDate = expenses.reduce((acc, exp) => {
       const dateKey = new Date(exp.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       acc[dateKey] = acc[dateKey] || [];
       acc[dateKey].push(exp);
       return acc;
   }, {});
+  
   for (const [dateKey, itemsOnDate] of Object.entries(groupedByDate)) {
       const dateLi = document.createElement('li');
-      // Hapus style inline, biarkan CSS yang mengatur
       dateLi.innerHTML = `
           <span>${dateKey}</span>
           <i class="fas fa-chevron-down toggle-category"></i> 
       `;
       expensesUl.appendChild(dateLi);
+      
       const subUl = document.createElement('ul');
       subUl.classList.add('ms-3', 'mt-2', 'mb-2', 'd-none');
       itemsOnDate.forEach(exp => {
           const itemLi = document.createElement('li');
-          // Hapus className lama, biarkan CSS yang mengatur
-          
-          // BARU: Tambahkan ikon sumber pembayaran
           const sumberIkon = exp.sumber === 'tunai' 
               ? '<i class="fas fa-wallet fa-xs me-2 text-info"></i>' 
               : '<i class="fas fa-university fa-xs me-2 text-primary"></i>';
@@ -1738,18 +1430,10 @@ function renderExpensesList() {
   }
 }
 
-// MODIFIKASI: Fungsi untuk Menangani Penghapusan berdasarkan ID (Poin D)
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Menangani Penghapusan (DIMODIFIKASI untuk Mengembalikan Saldo)
- */
 function handleDeleteExpenseById(e) {
   const expenseId = e.target.getAttribute('data-id');
   if (!expenseId) return;
 
-  // Konfirmasi sebelum hapus
   if (!confirm("Apakah Anda yakin ingin menghapus pengeluaran ini? Saldo Anda akan dikembalikan.")) {
       return;
   }
@@ -1761,7 +1445,6 @@ function handleDeleteExpenseById(e) {
   let amountToRestore = 0;
   let sumberToRestore = null;
 
-  // Cari di SEMUA kunci localStorage pengguna
   for (let key in localStorage) {
     if (key.startsWith(`expenses_${currentUser}_`)) {
       let expensesInMonth = JSON.parse(localStorage.getItem(key)) || [];
@@ -1770,8 +1453,8 @@ function handleDeleteExpenseById(e) {
       expensesInMonth = expensesInMonth.filter(exp => {
           if (exp.id === idToDelete) {
               deletedItemInfo = `"${capitalizeFirstLetter(exp.barang)}"`;
-              amountToRestore = exp.amount; // Simpan jumlah
-              sumberToRestore = exp.sumber; // Simpan sumber
+              amountToRestore = exp.amount; 
+              sumberToRestore = exp.sumber; 
               return false;
           }
           return true;
@@ -1790,8 +1473,6 @@ function handleDeleteExpenseById(e) {
   }
 
   if (expenseDeleted) {
-    
-    // BARU: Kembalikan Saldo
     if (amountToRestore > 0 && sumberToRestore) {
         let saldo = getSaldo();
         if (sumberToRestore === 'tunai') {
@@ -1802,28 +1483,23 @@ function handleDeleteExpenseById(e) {
         saveSaldo(saldo);
         showNotification(`Pengeluaran ${deletedItemInfo} dihapus. Saldo dikembalikan.`, 'success');
     } else {
-        // Fallback jika item lama tidak punya 'sumber'
         showNotification(`Pengeluaran ${deletedItemInfo} telah dihapus.`, 'success');
     }
     
-    // Render ulang list bulan ini
     const activeSection = document.querySelector('.section.active');
     if (activeSection && activeSection.id === 'add-expense-section') {
       renderExpensesList();
-      updateSaldoInfoDiForm(); // Update info saldo di form
+      updateSaldoInfoDiForm(); 
     }
     
-    // Update data di halaman lain
     updateCategoryDropdownOptions();
     populateCategoryExpenseMonthOptions();
     initializeHistoryYearOptions();
     initializePrintYearOptions();
 
-    // Jika riwayat terbuka, render ulang
     if (activeSection && activeSection.id === 'history-expense-section') {
       renderHistoryContent();
     }
-    // Perbarui UI Dashboard/Dompet
     if (activeSection === 'dashboard-section') renderDashboard();
     if (activeSection === 'dompet-section') renderDompetPage();
 
@@ -1832,31 +1508,6 @@ function handleDeleteExpenseById(e) {
   }
 }
 
-  if (expenseDeleted) {
-    showNotification(`Pengeluaran ${deletedItemInfo} telah dihapus.`, 'success');
-    
-    // Render ulang list bulan ini jika kita ada di halaman 'Tambah'
-    const activeSection = document.querySelector('.section.active');
-    if (activeSection && activeSection.id === 'add-expense-section') {
-      renderExpensesList();
-    }
-    
-    // Update data dropdown & bulan (karena data mungkin berubah)
-    updateCategoryDropdownOptions();
-    populateCategoryExpenseMonthOptions();
-    initializeHistoryYearOptions(); // Update opsi tahun/bulan riwayat
-    initializePrintYearOptions(); // Update opsi tahun/bulan cetak
-
-    // Jika riwayat terbuka, render ulang jika perlu
-    if (activeSection && activeSection.id === 'history-expense-section') {
-      renderHistoryContent(); // Render ulang konten riwayat
-    }
-  } else {
-    showNotification('Gagal menghapus pengeluaran. Item tidak ditemukan.', 'danger');
-  }
-
-
-// MODIFIKASI BESAR: Fungsi untuk Merender Grafik Pengeluaran Harian (Poin C & Mod A)
 function renderDailyExpenseChart() {
   const currentUser = localStorage.getItem('currentUser');
   const currentMonth = getCurrentMonth();
@@ -1864,9 +1515,7 @@ function renderDailyExpenseChart() {
   const expensesKey = `expenses_${currentUser}_${currentYear}_${currentMonth}`;
   const expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
 
-  // Mengelompokkan pengeluaran berdasarkan tanggal
   const grouped = expenses.reduce((acc, exp) => {
-    // Gunakan tanggal dari data expense, bukan tanggal hari ini
     const date = new Date(exp.date);
     const formattedDate = date.toLocaleDateString('id-ID');
     acc[formattedDate] = (acc[formattedDate] || 0) + exp.amount;
@@ -1881,21 +1530,18 @@ function renderDailyExpenseChart() {
   });
 
   const ctx = document.getElementById('daily-expense-chart')?.getContext('2d');
-  if (!ctx) return; // Guard clause
+  if (!ctx) return; 
 
-  // Hitung statistik untuk garis rata-rata (Poin C)
   const totalPengeluaran = data.reduce((sum, val) => sum + val, 0);
   const daysWithExpenses = data.filter(val => val > 0).length;
   const average = daysWithExpenses > 0 ? (totalPengeluaran / daysWithExpenses) : 0;
   
   const averageData = new Array(labels.length).fill(average);
   
-  // Gradient Fill (Poin C)
   const gradient = ctx.createLinearGradient(0, 0, 0, 400);
   gradient.addColorStop(0, 'rgba(75, 0, 130, 0.4)');
   gradient.addColorStop(1, 'rgba(75, 0, 130, 0)');
 
-  // Destroy chart sebelumnya jika ada
   if (dailyExpenseChart instanceof Chart) {
     dailyExpenseChart.destroy();
   }
@@ -1909,23 +1555,22 @@ function renderDailyExpenseChart() {
           label: 'Pengeluaran Harian (Rp)',
           data: data,
           fill: true,
-          backgroundColor: gradient, // Gradient (Poin C)
+          backgroundColor: gradient, 
           borderColor: '#4b0082',
           tension: 0.4,
-          pointBackgroundColor: '#4b0082', // Warna titik default (Poin C - Hapus Highlight)
-          pointBorderColor: '#4b0082',   // Warna border titik default
-          pointRadius: 3,                 // Radius titik default
+          pointBackgroundColor: '#4b0082', 
+          pointBorderColor: '#4b0082',   
+          pointRadius: 3,                 
           pointHoverRadius: 8,
         },
         {
           label: 'Rata-rata Pengeluaran',
           data: averageData,
           fill: false,
-          borderColor: '#fd7e14', // Oranye
-          borderDash: [5, 5], // Garis putus-putus
-          pointRadius: 0, // Sembunyikan titik
+          borderColor: '#fd7e14', 
+          borderDash: [5, 5], 
+          pointRadius: 0, 
           borderWidth: 2,
-          // Visibilitas dikontrol oleh tombol toggle
           hidden: !(document.getElementById('toggle-average-line')?.getAttribute('data-toggled') === 'true')
         }
       ]
@@ -1933,7 +1578,7 @@ function renderDailyExpenseChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { // Animasi lebih halus (Poin C)
+      animation: { 
         duration: 800, 
         easing: 'easeInOutQuad'
       },
@@ -1942,7 +1587,6 @@ function renderDailyExpenseChart() {
           position: 'top',
           labels: {
             color: '#333333',
-            // Sembunyikan legenda garis rata-rata
             filter: (legendItem, chartData) => legendItem.datasetIndex === 0
           }
         },
@@ -1961,9 +1605,7 @@ function renderDailyExpenseChart() {
               return `Pengeluaran: Rp${value.toLocaleString('id-ID')}`;
             }
           }
-        },
-        // HAPUS plugin zoom bawaan (karena pakai tombol fullscreen)
-        // zoom: { /* Konfigurasi zoom dihapus */ }
+        }
       },
       scales: {
         x: {
@@ -1977,35 +1619,27 @@ function renderDailyExpenseChart() {
           title: { display: true, text: 'Jumlah (Rp)', color: '#333333' }
         }
       },
-      // MODIFIKASI: Hanya picu modal detail saat titik diklik (Poin C)
       onClick: (evt, activeElements) => {
         if (activeElements.length > 0) {
-          // Pastikan kliknya di dataset utama (index 0)
           if (activeElements[0].datasetIndex === 0) { 
             const dataIndex = activeElements[0].index;
             const selectedDate = labels[dataIndex];
             showDailyDetailModal(selectedDate);
           }
         } 
-        // Klik di latar tidak melakukan apa-apa lagi
       },
-      // MODIFIKASI: Hanya ubah kursor saat di atas titik (Poin C)
       onHover: (event, chartElement) => {
         const canvas = event.native.target;
-        // Kursor pointer hanya jika di atas titik data utama
         canvas.style.cursor = (chartElement[0] && chartElement[0].datasetIndex === 0) ? 'pointer' : 'default';
       }
     },
   });
 
-  // Menampilkan Statistik Ringkas yang Baru (Poin C)
   displayDailyStats(grouped, expenses);
 }
 
-
-// BARU: Fungsi untuk Animasikan Grafik Harian (Poin C)
 function animateDailyChart() {
-    if (!dailyExpenseChart || isDailyChartAnimating) return; // Jangan animasikan jika sedang berjalan
+    if (!dailyExpenseChart || isDailyChartAnimating) return; 
 
     isDailyChartAnimating = true;
     const animateButton = document.getElementById('animate-daily-chart');
@@ -2014,54 +1648,45 @@ function animateDailyChart() {
         animateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menganimasikan...';
     }
     
-    // Reset data grafik
     const originalData = structuredClone(dailyExpenseChart.data.datasets[0].data);
     const dataLength = originalData.length;
     const emptyData = new Array(dataLength).fill(0);
     dailyExpenseChart.data.datasets[0].data = emptyData;
-    dailyExpenseChart.update('none'); // Update tanpa animasi
+    dailyExpenseChart.update('none'); 
 
     let currentStep = 0;
-    const animationSpeed = 150; // ms per step (sesuaikan)
+    const animationSpeed = 150; 
 
     function animationStep() {
         if (currentStep < dataLength) {
-            // Tampilkan data sampai step saat ini
-            const newData = originalData.slice(0, currentStep + 1).concat(new Array(dataLength - (currentStep + 1)).fill(null)); // null agar tidak digambar
+            const newData = originalData.slice(0, currentStep + 1).concat(new Array(dataLength - (currentStep + 1)).fill(null)); 
             dailyExpenseChart.data.datasets[0].data = newData;
-            dailyExpenseChart.update('none'); // Update cepat
+            dailyExpenseChart.update('none'); 
             currentStep++;
             dailyChartAnimationTimeout = setTimeout(animationStep, animationSpeed);
         } else {
-            // Animasi selesai
             isDailyChartAnimating = false;
             if (animateButton) {
                 animateButton.disabled = false;
                 animateButton.innerHTML = '<i class="fas fa-play-circle"></i> Animasikan Ulang';
             }
-            // Pastikan data terakhir ditampilkan penuh
             dailyExpenseChart.data.datasets[0].data = originalData;
             dailyExpenseChart.update('none');
         }
     }
 
-    // Hentikan animasi sebelumnya jika ada
     clearTimeout(dailyChartAnimationTimeout);
-    // Mulai animasi
     animationStep();
 }
-// MODIFIKASI BESAR: Fungsi untuk Menampilkan Statistik Harian (Poin C)
-// (Menggantikan displayDailySummary)
+
 function displayDailyStats(groupedDaily, expenses) {
   const currentUser = localStorage.getItem('currentUser');
-  if (!currentUser) return; // Guard clause
+  if (!currentUser) return; 
 
-  // 1. Ambil data bulan ini
   const totalBulanIni = Object.values(groupedDaily).reduce((sum, val) => sum + val, 0);
   const daysWithExpenses = Object.keys(groupedDaily).length;
   const avgBulanIni = daysWithExpenses > 0 ? (totalBulanIni / daysWithExpenses) : 0;
 
-  // 2. Ambil data bulan lalu untuk perbandingan
   const [prevYear, prevMonth] = getPreviousMonth();
   const prevExpensesKey = `expenses_${currentUser}_${prevYear}_${prevMonth}`;
   const prevExpenses = JSON.parse(localStorage.getItem(prevExpensesKey)) || [];
@@ -2071,7 +1696,6 @@ function displayDailyStats(groupedDaily, expenses) {
   if (prevExpenses.length > 0) {
     totalBulanLalu = prevExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     const prevGrouped = prevExpenses.reduce((acc, exp) => {
-      // Pastikan tanggal valid sebelum memproses
       const dateObj = new Date(exp.date);
       if (isNaN(dateObj.getTime())) return acc; 
       const date = dateObj.toLocaleDateString('id-ID');
@@ -2082,12 +1706,10 @@ function displayDailyStats(groupedDaily, expenses) {
     avgBulanLalu = prevDaysWithExpenses > 0 ? (totalBulanLalu / prevDaysWithExpenses) : 0;
   }
 
-  // 3. Hitung Perbandingan
   const [totalComparisonHtml, totalComparisonClass] = getComparisonHtml(totalBulanIni, totalBulanLalu);
   const [avgComparisonHtml, avgComparisonClass] = getComparisonHtml(avgBulanIni, avgBulanLalu);
 
-  // 4. Hitung Hari Terboros & Terhemat
-  let hariTerboros = { date: '-', amount: -1 }; // Mulai dari -1 agar 0 bisa jadi terendah
+  let hariTerboros = { date: '-', amount: -1 }; 
   let hariTerhemat = { date: '-', amount: Infinity };
 
   if (daysWithExpenses > 0) {
@@ -2095,17 +1717,14 @@ function displayDailyStats(groupedDaily, expenses) {
       if (amount > hariTerboros.amount) {
         hariTerboros = { date, amount };
       }
-      // Hanya update terhemat jika amount > 0 dan lebih kecil dari minimum saat ini
       if (amount > 0 && amount < hariTerhemat.amount) {
         hariTerhemat = { date, amount };
       }
     }
-    // Jika tidak ada hari > 0, hari terhemat tetap '-'
      if (hariTerhemat.amount === Infinity) hariTerhemat = { date: '-', amount: Infinity };
   }
 
 
-  // 5. Hitung Transaksi Tertinggi & Terendah
   let transTertinggi = { barang: '-', kategori: '-', amount: 0 };
   let transTerendah = { barang: '-', kategori: '-', amount: Infinity };
 
@@ -2114,21 +1733,16 @@ function displayDailyStats(groupedDaily, expenses) {
       if (exp.amount > transTertinggi.amount) {
         transTertinggi = exp;
       }
-      // Hanya update terendah jika amount > 0 dan lebih kecil dari minimum saat ini
       if (exp.amount > 0 && exp.amount < transTerendah.amount) {
         transTerendah = exp;
       }
     });
-     // Jika tidak ada transaksi > 0, terendah tetap '-'
      if (transTerendah.amount === Infinity) transTerendah = { barang: '-', kategori: '-', amount: Infinity };
   }
 
-  // 6. Update UI
-  // Total
   const totalBadge = document.getElementById('total-pengeluaran');
   if (totalBadge) {
       totalBadge.innerHTML = `Rp${totalBulanIni.toLocaleString('id-ID')}`;
-      // Hapus perbandingan lama jika ada
       const oldTotalComp = totalBadge.closest('li')?.querySelector('.stat-comparison');
       if(oldTotalComp) oldTotalComp.remove();
       if (totalBulanLalu > 0) {
@@ -2137,7 +1751,6 @@ function displayDailyStats(groupedDaily, expenses) {
   }
 
 
-  // Rata-rata
   const avgBadge = document.getElementById('rata-rata-harian');
   if(avgBadge) {
       avgBadge.innerHTML = `Rp${Math.round(avgBulanIni).toLocaleString('id-ID')}`;
@@ -2148,7 +1761,6 @@ function displayDailyStats(groupedDaily, expenses) {
       }
   }
 
-  // Hari Terboros
   const borosBadge = document.getElementById('hari-terboros');
   if (borosBadge) {
     if (hariTerboros.amount > 0) {
@@ -2158,7 +1770,6 @@ function displayDailyStats(groupedDaily, expenses) {
     }
   }
 
-  // Hari Terhemat
   const hematBadge = document.getElementById('hari-terhemat');
    if (hematBadge) {
     if (hariTerhemat.amount !== Infinity) {
@@ -2168,7 +1779,6 @@ function displayDailyStats(groupedDaily, expenses) {
     }
   }
 
-  // Transaksi Tertinggi
   const tinggiBadge = document.getElementById('pengeluaran-tertinggi');
   if (tinggiBadge) {
     if (transTertinggi.amount > 0) {
@@ -2178,7 +1788,6 @@ function displayDailyStats(groupedDaily, expenses) {
     }
   }
 
-  // Transaksi Terendah
   const rendahBadge = document.getElementById('pengeluaran-terendah');
   if (rendahBadge) {
     if (transTerendah.amount !== Infinity && transTerendah.amount > 0) {
@@ -2189,51 +1798,40 @@ function displayDailyStats(groupedDaily, expenses) {
   }
 }
 
-// BARU: Helper untuk perbandingan (Poin C)
 function getComparisonHtml(current, previous) {
-  if (previous === 0) {
-    return ['', ''];
-  }
+  if (previous === 0) return ['', ''];
 
   const diff = current - previous;
-  // Handle case where previous is positive and current is zero or negative (infinite percentage)
   if (previous > 0 && current <= 0) {
       return [`<i class="fas fa-arrow-down"></i> Turun 100%+ vs bln lalu`, 'stat-up'];
   }
-  // Handle case where previous is zero or negative and current is positive (infinite percentage)
    if (previous <= 0 && current > 0) {
        return [`<i class="fas fa-arrow-up"></i> Naik vs bln lalu`, 'stat-down'];
    }
-  // Handle case where both are zero or negative
   if (previous <= 0 && current <= 0) {
        return ['<i class="fas fa-equals"></i> Sama vs bln lalu', 'stat-same'];
   }
 
-  // Normal calculation
   const percentage = Math.abs((diff / previous) * 100);
 
   if (diff > 0) {
-    // Pengeluaran naik = panah merah (negatif)
     return [`<i class="fas fa-arrow-up"></i> Naik ${percentage.toFixed(0)}% vs bln lalu`, 'stat-down'];
   } else if (diff < 0) {
-    // Pengeluaran turun = panah hijau (positif)
     return [`<i class="fas fa-arrow-down"></i> Turun ${Math.abs(percentage).toFixed(0)}% vs bln lalu`, 'stat-up'];
   } else {
     return ['<i class="fas fa-equals"></i> Sama vs bln lalu', 'stat-same'];
   }
 }
 
-// BARU: Helper untuk dapat bulan lalu (Poin C)
 function getPreviousMonth() {
   const now = new Date();
   const currentYear = now.getFullYear();
-  const currentMonthIndex = now.getMonth(); // 0-11
+  const currentMonthIndex = now.getMonth(); 
 
-  if (currentMonthIndex === 0) { // Jika Januari (0)
-    return [currentYear - 1, 12]; // Tahun lalu, Desember (12)
+  if (currentMonthIndex === 0) { 
+    return [currentYear - 1, 12]; 
   } else {
-    // currentMonthIndex sudah merupakan index bulan lalu (karena index 0 = Januari)
-    return [currentYear, currentMonthIndex]; // Tahun ini, bulan lalu (index + 1 - 1 = index)
+    return [currentYear, currentMonthIndex]; 
   }
 }
 
@@ -2245,7 +1843,7 @@ function showInfoModal(title, message) {
     const modalBodyEl = document.getElementById('infoModalBody');
 
     if (modalTitleEl) modalTitleEl.textContent = title;
-    if (modalBodyEl) modalBodyEl.innerHTML = message; // Gunakan innerHTML agar bisa pakai <br>
+    if (modalBodyEl) modalBodyEl.innerHTML = message; 
 
     if (!infoModalInstance) {
         infoModalInstance = new bootstrap.Modal(modalEl);
@@ -2253,7 +1851,6 @@ function showInfoModal(title, message) {
     infoModalInstance.show();
 }
 
-// Fungsi untuk Merender Grafik Pengeluaran per Kategori (Pie Chart Utama)
 function renderCategoryExpenseChart() {
   const currentUser = localStorage.getItem('currentUser');
   const currentMonth = getCurrentMonth();
@@ -2261,13 +1858,8 @@ function renderCategoryExpenseChart() {
   const expensesKey = `expenses_${currentUser}_${currentYear}_${currentMonth}`;
   const expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
 
-  // Pastikan expenses adalah array
-  if (!Array.isArray(expenses)) {
-    console.error('Data pengeluaran per kategori tidak valid.');
-    return;
-  }
+  if (!Array.isArray(expenses)) return;
 
-  // Mengelompokkan pengeluaran berdasarkan kategori
   const grouped = expenses.reduce((acc, exp) => {
     acc[exp.kategori] = acc[exp.kategori] || 0;
     acc[exp.kategori] += exp.amount;
@@ -2278,9 +1870,8 @@ function renderCategoryExpenseChart() {
   const data = labels.map(label => grouped[label]);
 
   const ctx = document.getElementById('category-expense-chart')?.getContext('2d');
-   if (!ctx) return; // Guard clause
+   if (!ctx) return; 
 
-  // Destroy chart sebelumnya jika ada
   if (categoryExpenseChart instanceof Chart) {
     categoryExpenseChart.destroy();
   }
@@ -2315,24 +1906,19 @@ function renderCategoryExpenseChart() {
               const total = data.reduce((sum, val) => sum + val, 0);
               const value = context.parsed;
               const percentage = total === 0 ? 0 : ((value / total) * 100).toFixed(2);
-              // Capitalize label
               const label = context.label ? capitalizeFirstLetter(context.label) : '';
               return `${label}: Rp${value.toLocaleString('id-ID')} (${percentage}%)`;
             }
           }
         }
       },
-      // MODIFIKASI: Hanya picu modal detail saat slice diklik (Mod A dihapus)
       onClick: (evt, activeElements) => {
         if (activeElements.length > 0) {
-          // Pengguna mengklik SEGMEN/SLICE
           const index = activeElements[0].index;
           const selectedKategori = labels[index];
-          showCategoryDetails(selectedKategori); // Tampilkan modal doughnut
+          showCategoryDetails(selectedKategori); 
         }
-        // Klik di latar tidak melakukan apa-apa lagi
       },
-      // MODIFIKASI: Ubah kursor hanya saat di atas slice (Mod A dihapus)
       onHover: (event, chartElement) => {
         const canvas = event.native.target;
         canvas.style.cursor = chartElement[0] ? 'pointer' : 'default';
@@ -2341,7 +1927,6 @@ function renderCategoryExpenseChart() {
   });
 }
 
-// Fungsi untuk Menampilkan Detail Kategori (saat slice pie diklik)
 function showCategoryDetails(kategori) {
   const currentUser = localStorage.getItem('currentUser');
   const currentMonth = getCurrentMonth();
@@ -2349,13 +1934,10 @@ function showCategoryDetails(kategori) {
   const expensesKey = `expenses_${currentUser}_${currentYear}_${currentMonth}`;
   const expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
 
-  // Filter expenses by kategori
   const filteredExpenses = expenses.filter(exp => exp.kategori.toLowerCase() === kategori.toLowerCase());
 
-  // Hapus modal lama jika ada
   const oldModal = document.getElementById('categoryDetailModal');
   if (oldModal) {
-    // Pastikan modal ditutup sebelum dihapus jika masih terbuka
      const modalInstance = bootstrap.Modal.getInstance(oldModal);
      if (modalInstance) {
          modalInstance.hide();
@@ -2363,12 +1945,10 @@ function showCategoryDetails(kategori) {
     oldModal.remove();
   }
 
-
-  // Create a modal to display details
   const modal = document.createElement('div');
   modal.classList.add('modal', 'fade');
   modal.setAttribute('tabindex', '-1');
-  modal.id = 'categoryDetailModal'; // Beri ID agar bisa dihapus
+  modal.id = 'categoryDetailModal'; 
   modal.innerHTML = `
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -2389,11 +1969,9 @@ function showCategoryDetails(kategori) {
   `;
   document.body.appendChild(modal);
 
-  // Initialize Chart in Modal
   const ctx = modal.querySelector('#category-detail-chart')?.getContext('2d');
-  if (!ctx) return; // Guard clause
+  if (!ctx) return;
 
-  // Mengelompokkan barang dalam kategori
   const groupedBarang = filteredExpenses.reduce((acc, exp) => {
     acc[exp.barang] = acc[exp.barang] || 0;
     acc[exp.barang] += exp.amount;
@@ -2403,7 +1981,6 @@ function showCategoryDetails(kategori) {
   const labels = Object.keys(groupedBarang);
   const data = labels.map(label => groupedBarang[label]);
 
-  // Simpan chart ke variabel
   const detailChart = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -2434,70 +2011,53 @@ function showCategoryDetails(kategori) {
               const total = data.reduce((sum, val) => sum + val, 0);
               const value = context.parsed;
               const percentage = total === 0 ? 0 : ((value / total) * 100).toFixed(2);
-               // Capitalize label
               const label = context.label ? capitalizeFirstLetter(context.label) : '';
               return `${label}: Rp${value.toLocaleString('id-ID')} (${percentage}%)`;
             }
           }
         }
       },
-      // Klik tidak melakukan apa-apa di sini (zoom via tombol)
       onClick: null,
       onHover: null
     },
   });
 
-   // Tambahkan event listener untuk tombol fullscreen di modal detail
    modal.querySelector('.category-detail-fullscreen-btn')?.addEventListener('click', () => {
        handleFullscreenClick(detailChart);
    });
 
 
-  // Show the modal
   const bsModal = new bootstrap.Modal(modal);
   bsModal.show();
 
-  // Remove modal dari DOM setelah ditutup
   modal.addEventListener('hidden.bs.modal', () => {
-    if (detailChart) detailChart.destroy(); // Hancurkan chart
+    if (detailChart) detailChart.destroy(); 
     modal.remove();
   });
 }
 
-// Fungsi untuk Merender Riwayat Pengeluaran
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Fungsi untuk Merender Riwayat Pengeluaran
- * (Menggunakan format list-group seperti Pengeluaran Harian)
- */
+// render bagian riwayat pengeluaran
 function renderHistoryContent() {
   const selectedMonth = document.getElementById('history-month')?.value;
   const selectedYear = document.getElementById('history-year')?.value;
   const historyContent = document.getElementById('history-content');
-  if (!historyContent) return; // Guard clause
-  historyContent.innerHTML = ''; // Selalu bersihkan konten
+  if (!historyContent) return; 
+  historyContent.innerHTML = ''; 
 
-  // 1. Cek jika user belum memilih
   if (!selectedMonth || !selectedYear) {
     historyContent.innerHTML = '<p class="text-muted text-center">Silakan pilih tahun dan bulan untuk melihat riwayat pengeluaran.</p>';
     return;
   }
 
-  // 2. Ambil data dari localStorage
   const currentUser = localStorage.getItem('currentUser');
   const expensesKey = `expenses_${currentUser}_${selectedYear}_${selectedMonth}`;
   const expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
 
-  // 3. Cek jika data untuk bulan itu kosong
   if (expenses.length === 0) {
     historyContent.innerHTML = '<p class="text-muted text-center">Tidak ada data pengeluaran untuk bulan ini.</p>';
     return;
   }
 
-  // 4. Kalkulasi Statistik
-  // Group by category untuk total
   const groupedByCategory = expenses.reduce((acc, exp) => {
     acc[exp.kategori] = acc[exp.kategori] || 0;
     acc[exp.kategori] += exp.amount;
@@ -2505,33 +2065,26 @@ function renderHistoryContent() {
   }, {});
   const total = Object.values(groupedByCategory).reduce((sum, val) => sum + val, 0);
   
-  // Hitung hari unik yang ada pengeluaran
   const daysWithExpenses = new Set(expenses.map(exp => {
       const dateObj = new Date(exp.date);
-      // Hanya hitung tanggal valid
       return !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString('id-ID') : null;
   })).size;
   
-  // Hitung rata-rata harian (berdasarkan hari yang ada pengeluaran)
   const average = daysWithExpenses > 0 ? (total / daysWithExpenses) : 0;
 
-  // Cari transaksi (1x) tertinggi dan terendah
   let maxExpense = { amount: 0, kategori: '-', barang: '-', date: '' };
   let minExpense = { amount: Infinity, kategori: '-', barang: '-', date: '' };
   expenses.forEach(exp => {
     if (exp.amount > maxExpense.amount) {
       maxExpense = { ...exp, date: new Date(exp.date).toLocaleDateString('id-ID') };
     }
-     // Hanya update terendah jika > 0
     if (exp.amount > 0 && exp.amount < minExpense.amount) {
       minExpense = { ...exp, date: new Date(exp.date).toLocaleDateString('id-ID') };
     }
   });
-   // Handle jika tidak ada pengeluaran > 0
    if (minExpense.amount === Infinity) minExpense = { amount: Infinity, kategori: '-', barang: '-', date: '-' };
 
 
-  // 5. Buat HTML untuk Statistik (Format BARU)
   const statsHtml = `
     <div class="statistic-container mb-3">
         <h5 class="mb-3 text-primary text-center">Ringkasan Bulan ${capitalizeFirstLetter(getMonthName(selectedMonth))} ${selectedYear}</h5>
@@ -2557,7 +2110,6 @@ function renderHistoryContent() {
   `;
   historyContent.innerHTML += statsHtml;
 
-  // 6. Render Chart Pengeluaran Harian (Line Chart)
   const dailyExpenses = expenses.reduce((acc, exp) => {
     const dateObj = new Date(exp.date);
      if (isNaN(dateObj.getTime())) return acc; 
@@ -2573,7 +2125,6 @@ function renderHistoryContent() {
     return dailyExpenses[formattedDate] || 0;
   });
 
-  // Buat kontainer dan canvas untuk line chart
   const historyDailyContainer = document.createElement('div');
   historyDailyContainer.className = 'chart-container';
   historyDailyContainer.style.height = '300px';
@@ -2586,12 +2137,10 @@ function renderHistoryContent() {
   historyContent.appendChild(historyDailyContainer);
   const historyDailyCtx = historyDailyContainer.querySelector('#history-daily-chart')?.getContext('2d');
 
-  // Hancurkan chart lama jika ada
   if (historyDailyExpenseChart instanceof Chart) {
     historyDailyExpenseChart.destroy();
   }
 
-  // Buat chart baru
   if (historyDailyCtx) {
     historyDailyExpenseChart = new Chart(historyDailyCtx, {
       type: 'line',
@@ -2628,12 +2177,9 @@ function renderHistoryContent() {
     });
   }
 
-
-  // 7. Render Chart Pengeluaran per Kategori (Pie Chart)
   const categoryLabels = Object.keys(groupedByCategory);
   const categoryData = categoryLabels.map(label => groupedByCategory[label]);
 
-  // Buat kontainer dan canvas untuk pie chart
   const historyCategoryContainer = document.createElement('div');
   historyCategoryContainer.className = 'chart-container';
   historyCategoryContainer.style.height = '300px';
@@ -2646,12 +2192,10 @@ function renderHistoryContent() {
   historyContent.appendChild(historyCategoryContainer);
   const historyCategoryCtx = historyCategoryContainer.querySelector('#history-category-chart')?.getContext('2d');
 
-  // Hancurkan chart lama jika ada
   if (historyCategoryExpenseChart instanceof Chart) {
     historyCategoryExpenseChart.destroy();
   }
 
-  // Buat chart baru
   if (historyCategoryCtx) {
     historyCategoryExpenseChart = new Chart(historyCategoryCtx, {
       type: 'pie',
@@ -2689,8 +2233,7 @@ function renderHistoryContent() {
   }
 }
 
-
-// Fungsi untuk Menangani Cetak Pengeluaran PDF
+// form submit cetak PDF
 function handlePrintExpense(e) {
   e.preventDefault();
   const printYear = document.getElementById('print-year')?.value;
@@ -2702,7 +2245,6 @@ function handlePrintExpense(e) {
        showNotification('Silakan isi semua bidang dengan benar.', 'danger');
        return;
   }
-
 
   const targetNumber = parseFloat(targetInput);
   if (isNaN(targetNumber)) {
@@ -2718,132 +2260,68 @@ function handlePrintExpense(e) {
     return;
   }
 
-  // Tampilkan Animasi Cetak
   showPrintAnimation();
 
-  // Tunggu selama 4 detik sebelum mencetak
   setTimeout(() => {
     generateRekapDataPDF(printYear, printMonth, currentUser, expenses, targetNumber, tujuanPengeluaran);
     hidePrintAnimation();
   }, 4000);
-};
+}
 
-// Fungsi untuk Menampilkan Animasi Cetak
 function showPrintAnimation() {
   const printAnimation = document.getElementById('print-animation');
   if (printAnimation) printAnimation.style.display = 'flex';
 }
 
-// Fungsi untuk Menyembunyikan Animasi Cetak
 function hidePrintAnimation() {
   const printAnimation = document.getElementById('print-animation');
    if (printAnimation) printAnimation.style.display = 'none';
 }
 
-// Fungsi untuk Merender Dashboard Awal
 function renderDashboard() {
-  // Hanya panggil fungsi render jika elemennya ada
   if (document.getElementById('expenses-ul')) renderExpensesList();
   if (document.getElementById('daily-expense-chart')) renderDailyExpenseChart();
   if (document.getElementById('category-expense-chart')) renderCategoryExpenseChart();
   
   initializeCategoryExpenseEnhanced();
-  checkBudgetAlert(); // Panggil ini untuk inisialisasi dropdown kategori enhanced
+  checkBudgetAlert(); 
 }
 
-// ===== SEMUA FUNGSI BARU DI BAWAH INI =====
-
-// ==========================================================
-// ===== FUNGSI-FUNGSI BARU UNTUK FITUR ANALISIS LANJUTAN =====
-// ==========================================================
-
-/**
- * Mereset tampilan visualisasi analisis (grafik, loading, no-data)
- */
-/**
- * Mereset tampilan visualisasi analisis (grafik, loading, no-data)
- * GANTI FUNGSI INI.
- */
-/**
- * ==========================================================
- * FUNGSI BARU: (Tambahkan Blok Ini)
- * ==========================================================
- * FUNGSI-FUNGSI HANDLER BARU UNTUK SALDO & BUDGET
- */
-
-/**
- * (Helper BARU) Merender data di halaman Dom
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * (Helper BARU) Merender data di halaman Dompet
- */
 function renderDompetPage() {
-    // 1. Update Tampilan Kartu Saldo
-    updateSaldoDisplay(); // Panggil helper update saldo
-
-    // 2. Update Tampilan Widget Budget
-    updateBudgetDisplay(); // Panggil helper update budget
-    
-    // 3. Cek Peringatan Budget
+    updateSaldoDisplay(); 
+    updateBudgetDisplay(); 
     checkBudgetAlert();
 }
-/**
- * Menangani penyimpanan Budget baru dari modal
- */
-/**
- * ==========================================================
- * FUNGSI BARU: (Tambahkan Blok Ini)
- * ==========================================================
- * FUNGSI-FUNGSI BARU UNTUK MERESET SALDO
- */
 
-/**
- * Menangani Reset Saldo Tunai
- */
 function handleResetTunai() {
-    // Panggil modal konfirmasi kustom
     showCustomConfirm(
-        "Konfirmasi Reset Saldo", // Judul
-        "Anda yakin ingin mereset saldo <strong>Dompet (Tunai)</strong> menjadi Rp0?", // Pesan
-        () => { // Fungsi yg dijalankan jika "Ya"
+        "Konfirmasi Reset Saldo", 
+        "Anda yakin ingin mereset saldo <strong>Dompet (Tunai)</strong> menjadi Rp0?", 
+        () => { 
             let saldo = getSaldo();
             saldo.tunai = 0;
             saveSaldo(saldo);
-            renderDompetPage(); // Render ulang halaman dompet
+            renderDompetPage(); 
             showNotification("Saldo Dompet (Tunai) berhasil direset.", "success");
         }
     );
 }
 
-/**
- * Menangani Reset Saldo Bank
- */
 function handleResetBank() {
-    // Panggil modal konfirmasi kustom
     showCustomConfirm(
-        "Konfirmasi Reset Saldo", // Judul
-        "Anda yakin ingin mereset saldo <strong>Bank (Non-Tunai)</strong> menjadi Rp0?", // Pesan
-        () => { // Fungsi yg dijalankan jika "Ya"
+        "Konfirmasi Reset Saldo", 
+        "Anda yakin ingin mereset saldo <strong>Bank (Non-Tunai)</strong> menjadi Rp0?", 
+        () => { 
             let saldo = getSaldo();
             saldo.bank = 0;
             saveSaldo(saldo);
-            renderDompetPage(); // Render ulang halaman dompet
+            renderDompetPage(); 
             showNotification("Saldo Bank (Non-Tunai) berhasil direset.", "success");
         }
     );
 }
 
-
-
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Menangani penyimpanan Budget baru dari modal
- * (DIMODIFIKASI: Menambahkan validasi terhadap Total Saldo)
- */
+// simpan budget bulanan dari modal
 function handleSaveBudget(e) {
     e.preventDefault();
     const budgetInput = document.getElementById('budget-jumlah');
@@ -2855,111 +2333,81 @@ function handleSaveBudget(e) {
         return;
     }
 
-    // ==========================================================
-    // ===== PERBAIKAN: VALIDASI BUDGET VS TOTAL SALDO =====
-    // ==========================================================
-    const saldo = getSaldo(); // Ambil saldo (tunai & bank)
+    // validasi jgn sampe budget lebih gede dari saldo
+    const saldo = getSaldo(); 
     const totalSaldo = saldo.tunai + saldo.bank;
 
     if (budgetAmount > totalSaldo) {
         showNotification(`Budget (Rp${budgetAmount.toLocaleString('id-ID')}) tidak boleh melebihi Total Saldo Anda (Rp${totalSaldo.toLocaleString('id-ID')}).`, "danger");
-        return; // Hentikan penyimpanan jika budget terlalu besar
+        return; 
     }
-    // ==========================================================
 
-
-    saveBudget(budgetAmount); // Simpan budget jika lolos validasi
+    saveBudget(budgetAmount); 
     showNotification("Budget bulanan berhasil disimpan!", "success");
-    budgetModal.hide(); // Sembunyikan modal
+    budgetModal.hide(); 
     
-    // Perbarui UI di halaman dompet
     renderDompetPage();
 }
 
-/**
- * ==========================================================
- * FUNGSI BARU: (Tambahkan Blok Ini)
- * ==========================================================
- * FUNGSI-FUNGSI BARU UNTUK FITUR TAMBAHAN
- */
-
-/**
- * BARU (Poin 3): Menampilkan modal konfirmasi kustom
- * @param {string} title - Judul modal
- * @param {string} message - Isi pesan (bisa HTML)
- * @param {function} onConfirm - Fungsi yg dijalankan jika "Ya"
- */
 function showCustomConfirm(title, message, onConfirm) {
     const titleEl = document.getElementById('custom-confirm-title');
     const bodyEl = document.getElementById('custom-confirm-body');
     const headerEl = document.getElementById('custom-confirm-header');
 
     if (titleEl) titleEl.textContent = title;
-    if (bodyEl) bodyEl.innerHTML = message; // innerHTML agar bisa pakai <strong>
+    if (bodyEl) bodyEl.innerHTML = message; 
 
-    // Ubah warna header jadi 'danger' (merah)
     if(headerEl) {
         headerEl.classList.add('bg-danger', 'text-white');
     }
 
-    onConfirmCallback = onConfirm; // Simpan aksi
+    onConfirmCallback = onConfirm; 
     if (customConfirmModal) customConfirmModal.show();
 }
 
-/**
- * BARU (Poin 2): Menangani Reset Budget
- */
 function handleResetBudget() {
     showCustomConfirm(
         "Konfirmasi Reset Budget",
         "Anda yakin ingin mereset <strong>Budget Bulan Ini</strong>? Anda harus mengaturnya lagi.",
-        () => { // Ini adalah onConfirm callback
+        () => { 
             const currentUser = localStorage.getItem('currentUser');
             const currentMonthKey = `${getCurrentYear()}-${getCurrentMonth()}`;
             if (!currentUser) return;
             const key = `budget_${currentUser}_${currentMonthKey}`;
             
-            localStorage.removeItem(key); // Hapus budget dari localStorage
+            localStorage.removeItem(key); 
             
-            renderDompetPage(); // Render ulang
+            renderDompetPage(); 
             showNotification("Budget bulan ini telah direset.", "success");
         }
     );
 }
 
-/**
- * BARU (Poin 1): Menampilkan animasi Pemasukan
- * @param {string} tipeTujuan - 'tunai' atau 'bank'
- */
+// show animasi ketika nambah pemasukan tunai/bank
 function showPemasukanAnimation(tipeTujuan) {
     const overlay = document.getElementById('pemasukan-animation');
     const textElement = document.getElementById('pemasukan-anim-text');
     
     if (overlay) {
-        // Hapus kelas animasi lama & set teks
         overlay.classList.remove('anim-tunai', 'anim-bank');
         
         if (tipeTujuan === 'tunai') {
             if(textElement) textElement.textContent = "Menyimpan ke Dompet...";
-            overlay.classList.add('anim-tunai'); // Trigger animasi ke dompet
+            overlay.classList.add('anim-tunai'); 
         } else {
             if(textElement) textElement.textContent = "Menyimpan ke Bank...";
-            overlay.classList.add('anim-bank'); // Trigger animasi ke bank
+            overlay.classList.add('anim-bank'); 
         }
         
         overlay.style.display = 'flex';
         
-        // Sembunyikan setelah animasi selesai
         setTimeout(() => {
             overlay.style.display = 'none';
             overlay.classList.remove('anim-tunai', 'anim-bank');
-        }, 2500); // Durasi animasi
+        }, 2500); 
     }
 }
 
-/**
- * BARU (Poin 4): Helper untuk mengambil detail pengeluaran bulan ini
- */
 function getMonthlyExpenseDetails() {
     const currentUser = localStorage.getItem('currentUser');
     const currentMonth = getCurrentMonth();
@@ -2980,10 +2428,6 @@ function getMonthlyExpenseDetails() {
     return { expenses, pengeluaranTunai, pengeluaranBank };
 }
 
-
-/**
- * BARU (Poin 4): Mengupdate Bar Pengeluaran vs Saldo
- */
 function updateExpenditureVsSaldoBar() {
     const selectBtn = document.getElementById('expenditure-saldo-select');
     const compareType = selectBtn ? selectBtn.getAttribute('data-current-value') || 'tunai' : 'tunai';
@@ -2992,7 +2436,7 @@ function updateExpenditureVsSaldoBar() {
     const percentText = document.getElementById('exp-saldo-percentage');
     const infoText = document.getElementById('exp-saldo-info-text');
 
-    if (!bar || !percentText || !infoText) return; // Guard clause
+    if (!bar || !percentText || !infoText) return; 
 
     const { pengeluaranTunai, pengeluaranBank } = getMonthlyExpenseDetails();
     const totalPengeluaran = pengeluaranTunai + pengeluaranBank;
@@ -3011,37 +2455,27 @@ function updateExpenditureVsSaldoBar() {
     } else if (compareType === 'bank') {
         totalAvailable = totalAvailableBank;
         label = "Total Bank";
-    } else { // 'total'
+    } else { 
         totalAvailable = totalAvailableGabungan;
         label = "Total Saldo";
     }
 
     const percentage = (totalAvailable > 0) ? (totalPengeluaran / totalAvailable) * 100 : 0;
     
-    // Update UI Bar
     bar.style.width = `${Math.min(100, percentage)}%`;
     percentText.textContent = `${percentage.toFixed(0)}%`;
     infoText.textContent = `Total Keluar Rp${totalPengeluaran.toLocaleString('id-ID')} / ${label} Rp${totalAvailable.toLocaleString('id-ID')}`;
     
-    // ==========================================================
-    // ===== PERBAIKAN: LOGIKA WARNA BARU (DEFAULT UNGU) =====
-    // ==========================================================
-    bar.classList.remove('bg-danger', 'bg-warning'); // Reset
+    bar.classList.remove('bg-danger', 'bg-warning'); 
     
-    // Default adalah ungu (dari CSS), hanya tambahkan kelas jika warning/danger
+    // warnain progress bar berdasar persen
     if (percentage >= 90) {
         bar.classList.add('bg-danger');
     } else if (percentage >= 70) {
         bar.classList.add('bg-warning');
     }
-    // Jika di bawah 70%, tidak ada kelas yg ditambahkan,
-    // sehingga warna default #4b0082 dari CSS akan dipakai.
-    // ==========================================================
 }
 
-/**
- * Menangani penambahan Pemasukan dari modal
- */
 function handleTambahPemasukan(e) {
     e.preventDefault();
     const jumlahInput = document.getElementById('pemasukan-jumlah');
@@ -3057,7 +2491,7 @@ function handleTambahPemasukan(e) {
     }
 
     const keterangan = keteranganInput.value || "Pemasukan";
-    const tipeTujuan = tujuan.value; // 'tunai' atau 'bank'
+    const tipeTujuan = tujuan.value; 
 
     let saldo = getSaldo();
 
@@ -3069,26 +2503,17 @@ function handleTambahPemasukan(e) {
 
     saveSaldo(saldo);
     
-    // ==========================================================
-    // ===== PERBAIKAN: TAMPILKAN ANIMASI (Poin 1) =====
-    // ==========================================================
-    pemasukanModal.hide(); // Sembunyikan modal dulu
-    showPemasukanAnimation(tipeTujuan); // Jalankan animasi
+    pemasukanModal.hide(); 
+    showPemasukanAnimation(tipeTujuan); 
     
-    // Tampilkan notifikasi & update UI setelah animasi selesai
     setTimeout(() => {
         showNotification(`Pemasukan Rp${jumlah.toLocaleString('id-ID')} ke ${tipeTujuan} berhasil!`, "success");
-        // Perbarui UI di halaman dompet
         renderDompetPage();
-    }, 2500); // Sesuaikan durasi dengan animasi
-    // ==========================================================
+    }, 2500); 
 
     document.getElementById('pemasukan-form').reset();
 }
 
-/**
- * Menangani transfer internal (Bank -> Dompet) dari modal
- */
 function handleTransferInternal(e) {
     e.preventDefault();
     const jumlahInput = document.getElementById('transfer-jumlah');
@@ -3106,34 +2531,29 @@ function handleTransferInternal(e) {
         return;
     }
 
-    // Proses transfer
     saldo.bank -= jumlah;
     saldo.tunai += jumlah;
 
-    // Simpan saldo baru
     saveSaldo(saldo);
     
-    // Sembunyikan modal dan jalankan animasi
     transferModal.hide();
-    showTransferAnimation(); // Panggil animasi "Mengirim uang..."
+    showTransferAnimation(); 
     
-    // Tampilkan notifikasi SETELAH animasi
     setTimeout(() => {
         showNotification(`Rp${jumlah.toLocaleString('id-ID')} berhasil dipindah ke Dompet.`, "success");
-        // Perbarui UI
         renderDompetPage();
-    }, 2500); // Sesuaikan dengan durasi animasi
+    }, 2500); 
 
     document.getElementById('transfer-form').reset();
 }
 
 function resetAnalysisViews() {
-    // Reset Anomali
+    // reset anomali dom
     const anomalyLoading = document.getElementById('anomali-loading');
     const anomalyNoData = document.getElementById('anomali-no-data');
     const chartContainer = document.getElementById('anomali-chart-container');
     if (anomalyChart instanceof Chart) { anomalyChart.destroy(); anomalyChart = null; }
-    if (chartContainer) chartContainer.style.height = '400px'; // Kembalikan tinggi
+    if (chartContainer) chartContainer.style.height = '400px'; 
     if (anomalyLoading) anomalyLoading.style.display = 'none';
     if (anomalyNoData) anomalyNoData.style.display = 'none';
     const anomDescCollapse = document.getElementById('anomali-description-collapse');
@@ -3144,23 +2564,21 @@ function resetAnalysisViews() {
     const insightContent = document.getElementById('anomali-insight-content');
     if(insightContent) insightContent.innerHTML = '';
 
-    // Reset Prediksi (Versi BARU)
+    // reset prediksi
     const predictionResults = document.getElementById('prediksi-results-container');
-    const predictionAnimation = document.getElementById('prediksi-processing-animation'); // Elemen baru
-    const predictionInsight = document.getElementById('prediksi-insight-content'); // Elemen baru
+    const predictionAnimation = document.getElementById('prediksi-processing-animation'); 
+    const predictionInsight = document.getElementById('prediksi-insight-content'); 
     const predictionNoData = document.getElementById('prediksi-no-data');
     const predictionForm = document.getElementById('prediksi-form');
 
-    // Reset elemen BARU
     if (predictionResults) predictionResults.style.display = 'none';
     if (predictionAnimation) predictionAnimation.style.display = 'none';
     if (predictionInsight) {
         predictionInsight.style.display = 'none';
-        predictionInsight.innerHTML = ''; // Kosongkan konten
+        predictionInsight.innerHTML = ''; 
     }
     if (predictionNoData) predictionNoData.style.display = 'none';
 
-    // Reset form prediksi
     if (predictionForm) {
         document.getElementById('prediksi-kriteria-1').value = '';
         document.getElementById('enable-kriteria-2').checked = false;
@@ -3171,29 +2589,13 @@ function resetAnalysisViews() {
         if (typeof handleEnableKriteria2Change === 'function') { 
              handleEnableKriteria2Change();
         }
-        // Panggil update state tombol untuk menonaktifkannya
         if (typeof updatePredictionButtonState === 'function') {
             updatePredictionButtonState();
         }
     }
 }
 
-/**
- * Memuat data (jika belum) dan menjalankan deteksi anomali
- */
-// script.js
-
-/**
- * MODIFIKASI: Memuat data & menjalankan deteksi anomali
- * HANYA untuk BULAN INI (otomatis).
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * MODIFIKASI: Memuat data & menjalankan deteksi anomali
- * HANYA untuk BULAN INI (otomatis).
- */
+// proses deteksi otomatis untuk bulan ini doang
 function loadAndRunAnomalyDetection() {
     const loadingEl = document.getElementById('anomali-loading');
     const noDataEl = document.getElementById('anomali-no-data');
@@ -3203,22 +2605,18 @@ function loadAndRunAnomalyDetection() {
     const collapseEl = document.getElementById('anomali-description-collapse');
     const bsCollapse = bootstrap.Collapse.getInstance(collapseEl);
 
-    // Tampilkan loading, sembunyikan pesan error, reset chart & insight
     if (loadingEl) loadingEl.style.display = 'flex';
     if (noDataEl) noDataEl.style.display = 'none';
     if (anomalyChart instanceof Chart) { anomalyChart.destroy(); anomalyChart = null; }
     if (chartContainer) chartContainer.style.height = '400px';
 
-    if (insightContent) insightContent.innerHTML = ''; // Kosongkan insight
-    if (bsCollapse) bsCollapse.hide(); // Selalu tutup panel penjelasan
+    if (insightContent) insightContent.innerHTML = ''; 
+    if (bsCollapse) bsCollapse.hide(); 
 
-    // Ambil bulan & tahun SAAT INI
     const currentMonth = getCurrentMonth();
     const currentYear = getCurrentYear();
 
-    // Gunakan setTimeout agar loading spinner sempat terlihat
     setTimeout(() => {
-        // 1. Muat SEMUA data untuk perbandingan historis (IQR)
         if (!analysisDataLoaded || allUserExpensesCache.length === 0) {
             console.log("Loading all user expenses for anomaly detection...");
             allUserExpensesCache = getAllUserExpenses();
@@ -3227,7 +2625,6 @@ function loadAndRunAnomalyDetection() {
 
         if (loadingEl) loadingEl.style.display = 'none';
 
-        // 2. Cek data historis (total)
         if (allUserExpensesCache.length < 10) {
             console.log("Not enough total data for anomaly detection.");
             if (noDataEl) {
@@ -3238,13 +2635,11 @@ function loadAndRunAnomalyDetection() {
             return;
         }
 
-        // 3. Filter data HANYA untuk bulan INI
         const expensesForCurrentMonth = allUserExpensesCache.filter(exp => {
             const date = new Date(exp.date);
             return date.getFullYear() == currentYear && (date.getMonth() + 1) == currentMonth;
         });
 
-        // 4. Cek data di bulan terpilih
         if (expensesForCurrentMonth.length < 5) {
              console.log("Not enough data for current month.");
              if (noDataEl) {
@@ -3255,32 +2650,21 @@ function loadAndRunAnomalyDetection() {
              return;
         }
 
-        // ========================================================
-        // ===== PERBAIKAN: POPULASIKAN DROPDOWN FILTER =====
-        // ========================================================
         populateAnomalyCategoryFilter(expensesForCurrentMonth);
-        // ========================================================
 
-        // 5. Jalankan Deteksi (Terima objek hasil)
         const { anomalies, categoryBounds } = detectSpendingAnomalies(allUserExpensesCache, expensesForCurrentMonth);
         
-        // 6. Render Grafik (Kirim anomali DAN batas)
         renderAnomalyChart(anomalies, expensesForCurrentMonth, categoryBounds); 
-        
-        // 7. Render Insight (Fungsi ini dari file Anda)
         renderAnomalyInsight(anomalies, expensesForCurrentMonth.length);
 
     }, 250); 
 }
-/**
- * Memuat data (jika belum) dan menyiapkan form prediksi
- */
+
 function loadAndSetupPrediction() {
     const kriteria1Select = document.getElementById('prediksi-kriteria-1');
     const predictButton = document.getElementById('btn-prediksi');
-    const noDataEl = document.getElementById('prediksi-no-data'); // Referensi ke elemen no-data
+    const noDataEl = document.getElementById('prediksi-no-data'); 
 
-    // Reset hasil sebelumnya
     const predictionResultsContainer = document.getElementById('prediksi-results-container');
     if (predictionResultsContainer) predictionResultsContainer.style.display = 'none';
     if (predictionChart instanceof Chart) { predictionChart.destroy(); predictionChart = null; }
@@ -3289,7 +2673,7 @@ function loadAndSetupPrediction() {
     const predDescCollapse = document.getElementById('prediksi-description-collapse');
     if (predDescCollapse) bootstrap.Collapse.getInstance(predDescCollapse)?.hide();
     
-    if (noDataEl) noDataEl.style.display = 'none'; // Sembunyikan pesan no-data
+    if (noDataEl) noDataEl.style.display = 'none'; 
 
     if (!analysisDataLoaded || allUserExpensesCache.length === 0) {
         console.log("Loading all user expenses for prediction setup...");
@@ -3298,7 +2682,7 @@ function loadAndSetupPrediction() {
             allUserExpensesCache = getAllUserExpenses();
             analysisDataLoaded = true;
             hideLoading();
-            if (allUserExpensesCache.length < 10) { // Cek data minimal
+            if (allUserExpensesCache.length < 10) { 
                 showNotification("Data historis belum cukup untuk prediksi.", "warning");
                 if (kriteria1Select) kriteria1Select.disabled = true;
                 if (predictButton) predictButton.disabled = true;
@@ -3319,20 +2703,12 @@ function loadAndSetupPrediction() {
 }
 
 
-/**
- * Logika Deteksi Anomali (IQR)
- * @param {Array} allExpenses - Semua data historis
- * @param {Array} currentMonthExpenses - Data bulan ini saja
- * @returns {Array} - Array berisi objek anomali
- */
 function detectSpendingAnomalies(allExpenses, currentMonthExpenses) {
     console.log("Detecting anomalies...");
     const anomalies = [];
     const expensesByCategory = allExpenses.reduce((acc, exp) => {
-        // Normalisasi key kategori di sini agar konsisten
         const key = exp.kategori ? exp.kategori.toLowerCase() : 'tanpa_kategori'; 
         if (!acc[key]) acc[key] = [];
-        // Pastikan amount adalah angka sebelum di-push
         const amount = parseFloat(exp.amount);
         if (!isNaN(amount)) {
              acc[key].push(amount);
@@ -3340,7 +2716,7 @@ function detectSpendingAnomalies(allExpenses, currentMonthExpenses) {
         return acc;
     }, {});
 
-    const categoryBounds = {}; // Tetap simpan bounds di sini
+    const categoryBounds = {}; 
 
     for (const category in expensesByCategory) {
         const prices = expensesByCategory[category].sort((a, b) => a - b);
@@ -3355,27 +2731,21 @@ function detectSpendingAnomalies(allExpenses, currentMonthExpenses) {
         const lowerBound = Math.max(0, q1 - (1.5 * iqr)); 
         const upperBound = q3 + (1.5 * iqr);
 
-        // Simpan batas yang dihitung
         categoryBounds[category] = { 
-            lower: Math.round(lowerBound), // Bulatkan agar mudah dibaca
-            upper: Math.round(upperBound)  // Bulatkan
+            lower: Math.round(lowerBound), 
+            upper: Math.round(upperBound)  
         };
 
-        // Cek anomali HANYA pada data BULAN INI
         currentMonthExpenses.forEach(exp => {
             const expCategoryKey = exp.kategori ? exp.kategori.toLowerCase() : 'tanpa_kategori';
-            const expAmount = parseFloat(exp.amount); // Pastikan amount adalah angka
+            const expAmount = parseFloat(exp.amount); 
 
-            // Cek jika kategori cocok DAN amount valid
             if (expCategoryKey === category && !isNaN(expAmount)) { 
-                // ===== PERHATIKAN KONDISI INI (Sudah Benar) =====
-                // Mengecek apakah amount DI LUAR rentang (lebih kecil ATAU lebih besar)
+                // cek apakah ngaco harganya (di luar range iqr)
                 if (expAmount < lowerBound || expAmount > upperBound) {
-                // ===============================================
                     console.log("Anomaly found:", exp);
                     anomalies.push({
-                        ...exp, // Salin semua data expense asli
-                        // Simpan batas normal spesifik untuk anomali ini
+                        ...exp, 
                         normalLower: Math.round(lowerBound), 
                         normalUpper: Math.round(upperBound)
                     });
@@ -3386,83 +2756,35 @@ function detectSpendingAnomalies(allExpenses, currentMonthExpenses) {
     console.log("Category bounds calculated:", categoryBounds);
     console.log("Total anomalies found:", anomalies.length);
     
-    // ===== KEMBALIKAN KEDUANYA =====
     return { anomalies, categoryBounds }; 
 }
 
-/**
- * Render Grafik Anomali (Scatter Plot)
- * @param {Array} anomalies - Array objek anomali
- * @param {Array} currentMonthExpenses - Semua data bulan ini
- */
-/**
- * Render Grafik Anomali (Scatter Plot)
- * @param {Array} anomalies - Array objek anomali
- * @param {Array} currentMonthExpenses - Semua data bulan ini
- */
-/**
- * Render Grafik Anomali (Scatter Plot)
- * @param {Array} anomalies - Array objek anomali
- * @param {Array} currentMonthExpenses - Semua data bulan ini
- 
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Render Grafik Anomali (Scatter Plot)
- * @param {Array} anomalies - Array objek anomali
- * @param {Array} currentMonthExpenses - Semua data bulan ini
- * @param {Object} categoryBounds - Objek berisi batas normal per kategori
- */
-
-/**
- * ==========================================================
- * FUNGSI BARU: (Tambahkan Blok Ini)
- * ==========================================================
- * FUNGSI-FUNGSI BARU UNTUK FILTER ANOMALI
- */
-
-/**
- * BARU: Mempopulasikan dropdown filter kategori di hal. Anomali
- * @param {Array} currentMonthExpenses - Data pengeluaran bulan ini
- */
 function populateAnomalyCategoryFilter(currentMonthExpenses) {
     const filterSelect = document.getElementById('anomali-kategori-filter');
     if (!filterSelect) return;
 
-    // 1. Simpan value yang sedang dipilih (jika ada)
     const currentValue = filterSelect.value;
 
-    // 2. Kumpulkan semua kategori unik dari data bulan ini
-    // Kita gunakan nama yang sudah di-capitalize agar konsisten
     const categories = new Set(currentMonthExpenses.map(exp => 
         exp.kategori ? capitalizeFirstLetter(exp.kategori) : 'Lainnya'
     ));
 
-    // 3. Kosongkan (tapi sisakan "Tampilkan Semua")
     filterSelect.innerHTML = '<option value="semua" selected>Tampilkan Semua Kategori</option>';
 
-    // 4. Isi dengan kategori yang ditemukan, urutkan A-Z
     Array.from(categories).sort().forEach(cat => {
         const option = document.createElement('option');
-        option.value = cat; // Gunakan nama yg sudah di-capitalize
+        option.value = cat; 
         option.textContent = cat;
         filterSelect.appendChild(option);
     });
 
-    // 5. Set kembali ke value yg tadi dipilih (jika masih ada)
-    // Ini berguna agar filter tidak reset jika data di-refresh
     if (filterSelect.querySelector(`option[value="${currentValue}"]`)) {
         filterSelect.value = currentValue;
     }
 }
 
-/**
- * BARU: Fungsi untuk memfilter chart anomali berdasarkan kategori
- * (Dipanggil oleh event listener 'change' pada dropdown)
- */
+// jalankan filter pas dropdown onchange
 function filterAnomalyChart() {
-    // Pastikan chart dan data aslinya ada
     if (!anomalyChart || !anomalyChart.originalData) {
         return; 
     }
@@ -3472,66 +2794,24 @@ function filterAnomalyChart() {
 
     const selectedCategory = filterSelect.value;
 
-    // Ambil data asli yang kita simpan di 'renderAnomalyChart'
     const originalNormalData = anomalyChart.originalData.normal;
     const originalAnomalyData = anomalyChart.originalData.anomaly;
 
     if (selectedCategory === 'semua') {
-        // Kembalikan ke data asli (tanpa filter)
         anomalyChart.data.datasets[0].data = originalNormalData;
         anomalyChart.data.datasets[1].data = originalAnomalyData;
     } else {
-        // Terapkan filter berdasarkan properti 'category' di data point
         const filteredNormal = originalNormalData.filter(p => p.category === selectedCategory);
         const filteredAnomaly = originalAnomalyData.filter(p => p.category === selectedCategory);
         
-        // Ganti data chart dengan data yang sudah difilter
         anomalyChart.data.datasets[0].data = filteredNormal;
         anomalyChart.data.datasets[1].data = filteredAnomaly;
     }
 
-    // Perbarui tampilan chart
     anomalyChart.update();
 }
 
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Render Grafik Anomali (Scatter Plot)
- * (DIMODIFIKASI: Menambahkan 'ticks' pada sumbu-X agar tanggal muncul)
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Render Grafik Anomali (Scatter Plot)
- * (DIMODIFIKASI: Memperbaiki sumbu-X agar menampilkan label tanggal)
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Render Grafik Anomali (Scatter Plot)
- * (DIMODIFIKASI: Menambahkan 'maxRotation' untuk memaksa label muncul)
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Render Grafik Anomali (Scatter Plot)
- * (PERBAIKAN FINAL: Menghapus 'maxTicksLimit' & 'source: auto' 
- * agar TimeScale dapat bekerja dengan benar)
- */
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi ini)
- * ==========================================================
- * Render Grafik Anomali (Scatter Plot)
- * (PERBAIKAN FINAL V2: Mengganti tipe chart dari 'scatter' ke 'line'
- * dan menyembunyikan garisnya. Ini cara paling ampuh
- * untuk memaksa 'TimeScale' bekerja dengan benar.)
- */
+
 function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
     const ctx = document.getElementById('anomali-chart')?.getContext('2d');
     if (!ctx) { 
@@ -3560,7 +2840,7 @@ function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
             const bounds = categoryBounds ? categoryBounds[expCategoryKey] : null;
 
             const dataPoint = {
-                x: expenseDate, // Harus objek Date
+                x: expenseDate, 
                 y: expenseAmount,
                 label: `${capitalizeFirstLetter(exp.barang || 'Unknown')} (${capitalizeFirstLetter(exp.kategori || 'Unknown')})`,
                 category: capitalizeFirstLetter(exp.kategori || 'Lainnya'),
@@ -3580,12 +2860,7 @@ function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
 
     try {
         anomalyChart = new Chart(ctx, {
-            // ================================================
-            // ===== 1. PERUBAHAN UTAMA ADA DI SINI =====
-            // ================================================
-            type: 'line', // <-- Ganti dari 'scatter' ke 'line'
-            // ================================================
-
+            type: 'line', 
             data: {
                 datasets: [
                     {
@@ -3596,10 +2871,7 @@ function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
                         pointRadius: 5,
                         pointHoverRadius: 7,
                         pointStyle: 'circle',
-                        // ================================================
-                        // ===== 2. SEMBUNYIKAN GARISNYA =====
-                        // ================================================
-                        showLine: false // <-- Tambahkan ini
+                        showLine: false 
                     },
                     {
                         label: 'Anomali',
@@ -3609,17 +2881,13 @@ function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
                         pointRadius: 8,
                         pointHoverRadius: 10,
                         pointStyle: 'triangle',
-                        // ================================================
-                        // ===== 3. SEMBUNYIKAN GARISNYA =====
-                        // ================================================
-                        showLine: false // <-- Tambahkan ini
+                        showLine: false 
                     }
                 ]
             },
             options: {
                 responsive: true, 
                 maintainAspectRatio: false,
-                // Interaksi tetap sama
                 onClick: (evt, activeElements) => {
                     if (activeElements.length > 0) {
                         const dataIndex = activeElements[0].index;
@@ -3661,7 +2929,7 @@ function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
                     x: {
                         type: 'time', 
                         time: { 
-                            unit: 'day', // Unit waktu 'day'
+                            unit: 'day', 
                             tooltipFormat: 'dd MMM yyyy',
                             displayFormats: {
                                 day: 'dd MMM'
@@ -3673,11 +2941,10 @@ function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
                             drawBorder: false,
                             borderDash: [2, 3]
                         },
-                        // Konfigurasi ticks ini sekarang akan bekerja dgn benar
                         ticks: {
                             display: true,
                             color: '#333333',
-                            autoSkip: true, // <-- Ini akan melompati HARI (bukan data)
+                            autoSkip: true, 
                             autoSkipPadding: 15, 
                             maxRotation: 45,
                             minRotation: 0
@@ -3720,11 +2987,8 @@ function renderAnomalyChart(anomalies, currentMonthExpenses, categoryBounds) {
         showNotification("Gagal membuat grafik anomali.", "danger");
     }
 }
-/** // <-- AWAL Blok Komentar JSDoc
- * BARU: Menampilkan insight ringkas di bawah grafik anomali
- * @param {Array} anomalies - Array objek anomali yang ditemukan
- * @param {number} totalTransactionsInMonth - Jumlah total transaksi di bulan itu
- */ // <-- AKHIR Blok Komentar JSDoc 
+
+// tulisan insight kecil yg muncul di bawah grafik
 function renderAnomalyInsight(anomalies, totalTransactionsInMonth) {
     const insightContent = document.getElementById('anomali-insight-content');
     if (!insightContent) return;
@@ -3733,7 +2997,7 @@ function renderAnomalyInsight(anomalies, totalTransactionsInMonth) {
     const anomalyCount = anomalies.length;
 
     if (anomalyCount === 0) {
-        // --- KASUS JIKA TIDAK ADA ANOMALI ---
+        // kalo aman ga ada anomali
         insightHtml = `
             <div class="alert alert-success p-2" role="alert">
                 <h5 class="alert-heading mb-1" style="font-size: 1.1rem;">🎉 Luar Biasa!</h5>
@@ -3744,8 +3008,6 @@ function renderAnomalyInsight(anomalies, totalTransactionsInMonth) {
             </div>
         `;
     } else {
-        // --- KASUS JIKA ADA ANOMALI ---
-        // Temukan anomali termahal untuk insight
         const mostExpensiveAnomaly = anomalies.reduce((max, a) => a.amount > max.amount ? a : max, anomalies[0]);
         
         insightHtml = `
@@ -3767,21 +3029,16 @@ function renderAnomalyInsight(anomalies, totalTransactionsInMonth) {
     }
     
     insightContent.innerHTML = insightHtml;
-  // ===== TAMBAHKAN LOGIKA AUTO-OPEN =====
-    // Jika ada anomali, buka panel penjelasan secara otomatis
+    
+    // auto buka tab insight kalo dapet anomali
     if (anomalyCount > 0) {
         const collapseEl = document.getElementById('anomali-description-collapse');
-        // Gunakan 'getOrCreateInstance' untuk keamanan
         const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseEl);
         bsCollapse.show();
     }
 }
 
-/**
- * Fungsi terpusat untuk memeriksa status form dan mengaktifkan/menonaktifkan tombol "Lihat Hasil".
- */
 function updatePredictionButtonState() {
-    // Ambil nilai dari semua elemen form yang relevan
     const kriteria1Select = document.getElementById('prediksi-kriteria-1');
     const nilai1Select = document.getElementById('prediksi-nilai-1');
     const enableKriteria2Checkbox = document.getElementById('enable-kriteria-2');
@@ -3790,7 +3047,6 @@ function updatePredictionButtonState() {
     const predictButton = document.getElementById('btn-prediksi');
 
     if (!kriteria1Select || !nilai1Select || !enableKriteria2Checkbox || !kriteria2Select || !nilai2Select || !predictButton) {
-        console.error("Elemen form prediksi hilang saat update state tombol.");
         return;
     }
 
@@ -3800,14 +3056,14 @@ function updatePredictionButtonState() {
     const k2 = kriteria2Select.value;
     const v2 = nilai2Select.value;
 
-    let isButtonDisabled = true; // Mulai dengan nonaktif
+    let isButtonDisabled = true; 
 
-    if (k1 && v1) { // Kriteria 1 dan Nilai 1 harus terisi
-        if (enabled2) { // Jika Kriteria 2 diaktifkan
-            if (k2 && v2) { // Kriteria 2 dan Nilai 2 juga harus terisi
+    if (k1 && v1) { 
+        if (enabled2) { 
+            if (k2 && v2) { 
                 isButtonDisabled = false;
             }
-        } else { // Jika Kriteria 2 tidak diaktifkan
+        } else { 
             isButtonDisabled = false;
         }
     }
@@ -3815,24 +3071,10 @@ function updatePredictionButtonState() {
     predictButton.disabled = isButtonDisabled;
 }
 
-/**
- * Handler BARU saat Nilai Kombinasi (Nilai 2) berubah.
- * Ini adalah kunci perbaikan bug.
- */
 function handleNilai2Change() {
-    updatePredictionButtonState(); // Cukup panggil fungsi state terpusat
+    updatePredictionButtonState(); 
 }
 
-/**
- * Menyiapkan Event Listener untuk Form Prediksi
-/**
- * Menyiapkan Event Listener untuk Form Prediksi
- * @param {Array} allExpenses - Semua data historis
- */
-/**
- * Menyiapkan Event Listener untuk Form Prediksi
- * GANTI FUNGSI INI.
- */
 function setupPredictionForm(allExpenses) {
     const kriteria1Select = document.getElementById('prediksi-kriteria-1');
     const nilai1Select = document.getElementById('prediksi-nilai-1');
@@ -3844,11 +3086,9 @@ function setupPredictionForm(allExpenses) {
     const predictButton = document.getElementById('btn-prediksi');
 
     if (!kriteria1Select || !nilai1Select || !enableKriteria2Checkbox || !kriteria2Inputs || !kriteria2Select || !nilai2Select || !predictButton) {
-        console.error("Prediction form elements missing during setup!");
         return; 
     }
 
-    // Reset form state awal
     kriteria1Select.disabled = false;
     kriteria1Select.value = '';
     nilai1Select.disabled = true;
@@ -3863,42 +3103,25 @@ function setupPredictionForm(allExpenses) {
     nilai2Select.innerHTML = '<option value="">(Pilih Kriteria Kombinasi Dulu)</option>';
     predictButton.disabled = true;
 
-    // --- Manajemen Event Listener ---
-
-    // Listener untuk Kriteria 1
     kriteria1Select.addEventListener('change', () => {
         handleKriteria1Change(allExpenses); 
     });
     
-    // Listener untuk Nilai 1
     nilai1Select.addEventListener('change', handleNilai1Change);
 
-    // Listener untuk Checkbox Kriteria 2
     enableKriteria2Checkbox.addEventListener('change', handleEnableKriteria2Change);
 
-    // Listener untuk Kriteria 2
     kriteria2Select.addEventListener('change', () => {
         handleKriteria2Change(allExpenses); 
     });
     
-    // LISTENER BARU YANG MEMPERBAIKI BUG
     if (nilai2Select) {
         nilai2Select.addEventListener('change', handleNilai2Change);
     }
 
-    // Listener untuk Tombol Prediksi
     predictButton.addEventListener('click', runPredictionHandler);
 }
-// --- Handler untuk Form Prediksi (didefinisikan di luar setup) ---
 
-/**
- * Handler saat Kriteria Utama berubah. Menerima data expense sebagai parameter.
- *
- /**
- * Handler saat Kriteria Utama berubah.
- * GANTI FUNGSI INI.
- * @param {Array} allExpenses - Array berisi semua data historis pengeluaran.
- */
 function handleKriteria1Change(allExpenses) {
     const kriteria1Select = document.getElementById('prediksi-kriteria-1');
     const nilai1Select = document.getElementById('prediksi-nilai-1');
@@ -3907,7 +3130,6 @@ function handleKriteria1Change(allExpenses) {
     const predictButton = document.getElementById('btn-prediksi');
 
     if (!kriteria1Select || !nilai1Select || !enableKriteria2Checkbox || !kriteria2Select || !predictButton) {
-        console.error("Missing elements in handleKriteria1Change");
         return;
     }
 
@@ -3916,68 +3138,50 @@ function handleKriteria1Change(allExpenses) {
     updatePredictionValueOptions(kriteria1Select, nilai1Select, allExpenses);
 
     enableKriteria2Checkbox.checked = false;
-    handleEnableKriteria2Change(); // Panggil handler checkbox untuk reset tampilan
+    handleEnableKriteria2Change(); 
 
-    enableKriteria2Checkbox.disabled = !kriteria1Value; // Checkbox aktif jika Kriteria 1 dipilih
+    enableKriteria2Checkbox.disabled = !kriteria1Value; 
 
     if (kriteria1Value) {
         updatePredictionKriteriaOptions(kriteria2Select, kriteria1Value);
     } else {
-        kriteria2Select.innerHTML = ''; // Kosongkan opsi Kriteria 2 jika Kriteria 1 kosong
-        kriteria2Select.disabled = true; // Nonaktifkan Kriteria 2
+        kriteria2Select.innerHTML = ''; 
+        kriteria2Select.disabled = true; 
     }
     
-    // Panggil fungsi state terpusat di akhir
     updatePredictionButtonState();
 }
 
-/**
- * Handler saat Nilai Utama (Nilai 1) berubah.
- * GANTI FUNGSI INI.
- */
 function handleNilai1Change() {
-    // Cukup panggil fungsi state terpusat
     updatePredictionButtonState();
 }
 
-
-/**
- * Handler saat Checkbox "Gunakan Kriteria Kombinasi" berubah.
- * GANTI FUNGSI INI.
- */
 function handleEnableKriteria2Change() {
     const enableKriteria2Checkbox = document.getElementById('enable-kriteria-2');
     const kriteria2Inputs = document.getElementById('prediksi-kriteria-2-inputs');
     const kriteria2Select = document.getElementById('prediksi-kriteria-2');
     const nilai2Select = document.getElementById('prediksi-nilai-2');
     const predictButton = document.getElementById('btn-prediksi');
-    const nilai1Select = document.getElementById('prediksi-nilai-1'); // Dibutuhkan untuk cek status tombol
+    const nilai1Select = document.getElementById('prediksi-nilai-1'); 
 
     if (!enableKriteria2Checkbox || !kriteria2Inputs || !kriteria2Select || !nilai2Select || !predictButton || !nilai1Select) {
-         console.error("Missing elements in handleEnableKriteria2Change");
          return;
     }
 
     const isEnabled = enableKriteria2Checkbox.checked;
-    kriteria2Inputs.style.display = isEnabled ? 'flex' : 'none'; // Tampilkan/sembunyikan input Kriteria 2
-    kriteria2Select.disabled = !isEnabled; // Aktifkan/nonaktifkan dropdown Kriteria 2
-    nilai2Select.disabled = true; // Selalu nonaktifkan Nilai 2 saat checkbox berubah
+    kriteria2Inputs.style.display = isEnabled ? 'flex' : 'none'; 
+    kriteria2Select.disabled = !isEnabled; 
+    nilai2Select.disabled = true; 
 
     if (!isEnabled) {
          kriteria2Select.value = '';
          nilai2Select.innerHTML = '<option value="">(Pilih Kriteria Kombinasi Dulu)</option>';
-         nilai2Select.value = ''; // Pastikan value kosong
+         nilai2Select.value = ''; 
     }
 
-    // Panggil fungsi state terpusat di akhir
     updatePredictionButtonState();
 }
 
-/**
- * Handler saat Kriteria Kombinasi (Kriteria 2) berubah.
- * GANTI FUNGSI INI.
- * @param {Array} allExpenses - Array berisi semua data historis pengeluaran.
- */
 function handleKriteria2Change(allExpenses) {
     const kriteria2Select = document.getElementById('prediksi-kriteria-2');
     const nilai2Select = document.getElementById('prediksi-nilai-2');
@@ -3985,30 +3189,20 @@ function handleKriteria2Change(allExpenses) {
     const nilai1Select = document.getElementById('prediksi-nilai-1'); 
 
     if (!kriteria2Select || !nilai2Select || !predictButton || !nilai1Select) {
-        console.error("Missing elements in handleKriteria2Change");
         return;
     }
 
     updatePredictionValueOptions(kriteria2Select, nilai2Select, allExpenses);
-
-    // Panggil fungsi state terpusat di akhir
     updatePredictionButtonState();
 }
 
 function runPredictionHandler() {
-    runPrediction(allUserExpensesCache); // Panggil fungsi prediksi utama
+    runPrediction(allUserExpensesCache); 
 }
 
-/**
- * Mengisi dropdown Nilai berdasarkan Kriteria yang dipilih
- */
-/**
- * Mengisi dropdown Nilai berdasarkan Kriteria yang dipilih
- * GANTI FUNGSI INI. (Menambahkan case 'Bagian Hari')
- */
 function updatePredictionValueOptions(selectKriteriaElement, selectNilaiElement, allExpenses) {
     const selectedKriteria = selectKriteriaElement.value;
-    const currentNilai = selectNilaiElement.value; // Simpan nilai lama
+    const currentNilai = selectNilaiElement.value; 
     selectNilaiElement.innerHTML = '';
     selectNilaiElement.disabled = true;
 
@@ -4022,17 +3216,14 @@ function updatePredictionValueOptions(selectKriteriaElement, selectNilaiElement,
         switch (selectedKriteria) {
             case 'Nama Hari': options = new Set(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']); break;
             case 'Jenis Hari': options = new Set(['Weekday', 'Weekend']); break;
-            // OPSI BARU
             case 'Bagian Hari': options = new Set(['Pagi', 'Siang', 'Sore', 'Malam']); break;
             case 'Bagian Bulan': options = new Set(['Awal Bulan', 'Tengah Bulan', 'Akhir Bulan']); break;
             case 'Minggu ke-': options = new Set(['1', '2', '3', '4', '5']); break;
             case 'Kategori':
-                // Ambil dari kategori yang sudah disimpan
                 const savedCategoriesKey = `categories_${localStorage.getItem('currentUser')}`;
                 const savedCategories = JSON.parse(localStorage.getItem(savedCategoriesKey)) || [];
                 savedCategories.forEach(cat => options.add(capitalizeFirstLetter(cat)));
                 
-                // Ambil kategori dari data expense historis (allExpenses)
                 allExpenses.forEach(exp => {
                     if (exp.kategori) {
                         options.add(capitalizeFirstLetter(exp.kategori));
@@ -4049,21 +3240,16 @@ function updatePredictionValueOptions(selectKriteriaElement, selectNilaiElement,
     }
 
     selectNilaiElement.innerHTML = `<option value="" selected>(Pilih Nilai)</option>`;
-    // Menambahkan 'Bagian Hari' ke daftar yang tidak perlu di-sort
     const doNotSort = ['Nama Hari', 'Minggu ke-', 'Bagian Bulan', 'Bagian Hari'];
     const sortedOptions = doNotSort.includes(selectedKriteria) ? Array.from(options) : Array.from(options).sort();
     
     sortedOptions.forEach(opt => {
-        if(opt) selectNilaiElement.add(new Option(opt, opt)); // Tambah opsi
+        if(opt) selectNilaiElement.add(new Option(opt, opt)); 
     });
-    selectNilaiElement.value = currentNilai; // Coba set ke nilai lama
+    selectNilaiElement.value = currentNilai; 
     selectNilaiElement.disabled = false;
 }
 
-/**
- * Mengisi dropdown Kriteria 2 (tanpa duplikat Kriteria 1)
- * GANTI FUNGSI INI. (Menambahkan 'Bagian Hari' ke daftar)
- */
 function updatePredictionKriteriaOptions(selectKriteria2Element, excludeKriteria) {
      const allKriteria = ["Nama Hari", "Jenis Hari", "Bagian Hari", "Bagian Bulan", "Minggu ke-", "Kategori"];
      selectKriteria2Element.innerHTML = '<option value="" selected>(Pilih Kriteria Kombinasi)</option>';
@@ -4074,20 +3260,6 @@ function updatePredictionKriteriaOptions(selectKriteria2Element, excludeKriteria
      });
 }
 
-/**
- * Logika Inti Prediksi Pengeluaran
- * @param {Array} allExpenses - Semua data historis
- */
-/**
- * PERBAIKAN: Logika Inti Prediksi Pengeluaran
- * - Menangani kasus data filter kosong
- * - Menangani kasus hasil perhitungan NaN
- * - Membuat insight lebih cerdas dan fleksibel
- */
-/**
- * Logika Inti Prediksi Pengeluaran
- * GANTI FUNGSI INI SEPENUHNYA.
- */
 function runPrediction(allExpenses) {
     const kriteria1 = document.getElementById('prediksi-kriteria-1').value;
     const nilai1 = document.getElementById('prediksi-nilai-1').value;
@@ -4095,55 +3267,49 @@ function runPrediction(allExpenses) {
     const kriteria2 = useKriteria2 ? document.getElementById('prediksi-kriteria-2').value : null;
     const nilai2 = useKriteria2 ? document.getElementById('prediksi-nilai-2').value : null;
 
-    // Ambil elemen BARU dari HTML
     const resultsContainer = document.getElementById('prediksi-results-container');
     const animationEl = document.getElementById('prediksi-processing-animation');
     const insightEl = document.getElementById('prediksi-insight-content');
     const noDataEl = document.getElementById('prediksi-no-data');
 
-    // Validasi input awal (sudah dicek oleh tombol, tapi baik untuk keamanan)
     if (!kriteria1 || !nilai1 || (useKriteria2 && (!kriteria2 || !nilai2))) {
         showNotification("Pilih kriteria dan nilai prediksi yang valid.", "warning"); return;
     }
 
     console.log(`Running prediction for: ${kriteria1}=${nilai1}` + (useKriteria2 ? ` AND ${kriteria2}=${nilai2}` : ''));
 
-    // 1. Reset tampilan: Tampilkan kontainer, Tampilkan Animasi, Sembunyikan hasil/no-data
     if (resultsContainer) resultsContainer.style.display = 'block';
-    if (animationEl) animationEl.style.display = 'flex'; // 'flex' sesuai CSS
+    if (animationEl) animationEl.style.display = 'flex'; 
     if (insightEl) insightEl.style.display = 'none';
     if (noDataEl) noDataEl.style.display = 'none';
 
-    // Beri jeda 1.5 detik untuk animasi
     setTimeout(() => {
-        // 2. Filter data (DENGAN LOGIKA BARU 'Bagian Hari')
         const filteredExpenses = allExpenses.filter(exp => {
             const dateObj = new Date(exp.date);
             if (isNaN(dateObj.getTime())) return false;
             
-            // Ambil semua bagian tanggal
-            const parts = getDateParts(dateObj); // { tanggal, bulan, mingguKe, bagianBulan, tahun, jam }
+            const parts = getDateParts(dateObj); 
             const namaHari = getNamaHari(dateObj);
             const jenisHari = getJenisHari(namaHari);
-            const bagianHari = getBagianHari(dateObj); // <-- Ambil Bagian Hari
+            const bagianHari = getBagianHari(dateObj); 
 
             let match1 = false;
             switch (kriteria1) {
                 case 'Nama Hari': match1 = namaHari === nilai1; break;
                 case 'Jenis Hari': match1 = jenisHari === nilai1; break;
-                case 'Bagian Hari': match1 = bagianHari === nilai1; break; // <-- LOGIKA BARU
+                case 'Bagian Hari': match1 = bagianHari === nilai1; break; 
                 case 'Bagian Bulan': match1 = parts.bagianBulan === nilai1; break;
                 case 'Minggu ke-': match1 = parts.mingguKe.toString() === nilai1; break;
                 case 'Kategori': match1 = capitalizeFirstLetter(exp.kategori) === nilai1; break;
             }
 
-            let match2 = true; // Asumsikan lolos jika Kriteria 2 tidak aktif
+            let match2 = true; 
             if (useKriteria2 && kriteria2 && nilai2) {
-                match2 = false; // Set ke false dan buktikan true jika Kriteria 2 aktif
+                match2 = false; 
                  switch (kriteria2) {
                     case 'Nama Hari': match2 = namaHari === nilai2; break;
                     case 'Jenis Hari': match2 = jenisHari === nilai2; break;
-                    case 'Bagian Hari': match2 = bagianHari === nilai2; break; // <-- LOGIKA BARU
+                    case 'Bagian Hari': match2 = bagianHari === nilai2; break; 
                     case 'Bagian Bulan': match2 = parts.bagianBulan === nilai2; break;
                     case 'Minggu ke-': match2 = parts.mingguKe.toString() === nilai2; break;
                     case 'Kategori': match2 = capitalizeFirstLetter(exp.kategori) === nilai2; break;
@@ -4152,31 +3318,26 @@ function runPrediction(allExpenses) {
             return match1 && match2;
         });
 
-        // 3. Cek jika hasil filter kosong
         if (filteredExpenses.length === 0) {
             console.warn("No historical data matches the prediction criteria.");
-            if (animationEl) animationEl.style.display = 'none'; // Sembunyikan animasi
-            if (noDataEl) noDataEl.style.display = 'block'; // Tampilkan no data
-            if (insightEl) insightEl.style.display = 'none'; // Pastikan insight tersembunyi
-            return; // HENTIKAN eksekusi
+            if (animationEl) animationEl.style.display = 'none'; 
+            if (noDataEl) noDataEl.style.display = 'block'; 
+            if (insightEl) insightEl.style.display = 'none'; 
+            return; 
         }
 
-        // 4. Hitung total per hari unik (untuk rata-rata harian)
         const dailyTotals = filteredExpenses.reduce((acc, exp) => {
             const dateString = new Date(exp.date).toDateString();
             acc[dateString] = (acc[dateString] || 0) + exp.amount;
             return acc;
         }, {});
         const dailyTotalValues = Object.values(dailyTotals);
-        const totalDays = dailyTotalValues.length; // Jumlah hari unik
+        const totalDays = dailyTotalValues.length; 
 
-        // 5. Hitung Metrik Utama
         const totalTransactions = filteredExpenses.length;
         const totalAmount = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-        // Pastikan totalDays > 0 untuk menghindari pembagian dengan nol
-        const predictedAverage = totalDays > 0 ? (totalAmount / totalDays) : 0; // Rata-rata per HARI
+        const predictedAverage = totalDays > 0 ? (totalAmount / totalDays) : 0; 
         
-        // 6. Hitung Min/Max (Rentang)
         let minHist = Infinity, maxHist = 0;
         if (dailyTotalValues.length > 0) {
             minHist = Math.min(...dailyTotalValues);
@@ -4185,30 +3346,25 @@ function runPrediction(allExpenses) {
         const minAmount = (minHist === Infinity) ? 0 : minHist;
         const maxAmount = maxHist;
 
-        // 7. Hitung Insight Tambahan
         const avgPerTransaction = totalTransactions > 0 ? (totalAmount / totalTransactions) : 0;
 
-        // Kategori Paling Umum
         const categoryCounts = filteredExpenses.reduce((acc, exp) => {
             const cat = capitalizeFirstLetter(exp.kategori || 'Lainnya');
             acc[cat] = (acc[cat] || 0) + 1; return acc;
         }, {});
-        const dominantCategory = Object.entries(categoryCounts).sort((a,b) => b[1] - a[1])[0]; // [Nama, Jumlah]
+        const dominantCategory = Object.entries(categoryCounts).sort((a,b) => b[1] - a[1])[0]; 
 
-        // Item Paling Umum
         const itemCounts = filteredExpenses.reduce((acc, exp) => {
             const item = capitalizeFirstLetter(exp.barang || 'Item');
             acc[item] = (acc[item] || 0) + 1; return acc;
         }, {});
-        const dominantItem = Object.entries(itemCounts).sort((a,b) => b[1] - a[1])[0]; // [Nama, Jumlah]
+        const dominantItem = Object.entries(itemCounts).sort((a,b) => b[1] - a[1])[0]; 
 
-        // 8. Buat Teks Kriteria untuk Judul
         let criteriaText = `${kriteria1}: ${nilai1}`;
         if (useKriteria2 && kriteria2 && nilai2) {
             criteriaText += ` & ${kriteria2}: ${nilai2}`;
         }
 
-        // 9. Buat HTML untuk Insight
         const insightHTML = `
             <div class="insight-header">
                 Gambaran untuk: <strong>${criteriaText}</strong>
@@ -4258,59 +3414,40 @@ function runPrediction(allExpenses) {
             </div>
         `;
 
-        // 10. Tampilkan Hasil
-        if (animationEl) animationEl.style.display = 'none'; // Sembunyikan animasi
-        if (noDataEl) noDataEl.style.display = 'none'; // Pastikan no data tersembunyi
+        if (animationEl) animationEl.style.display = 'none'; 
+        if (noDataEl) noDataEl.style.display = 'none'; 
         if (insightEl) {
-            insightEl.innerHTML = insightHTML; // Masukkan HTML
-            insightEl.style.display = 'block'; // Tampilkan insight
+            insightEl.innerHTML = insightHTML; 
+            insightEl.style.display = 'block'; 
         }
 
-    }, 1500); // Delay 1.5 detik untuk animasi
+    }, 1500); 
 }
-/**
- * Render Grafik Prediksi (Bar Chart)
- * @param {number} predictedAverage - Rata2 hasil prediksi
- * @param {number} overallAverage - Rata2 pembanding
- * @param {string} criteriaText - Label untuk prediksi
- */
-/**
- * PERBAIKAN: Render Grafik Prediksi (Bar Chart)
- * - Menambahkan validasi NaN di awal
- */
 
-// Fungsi untuk Menangani Cetak Pengeluaran dengan PDF
-// Fungsi untuk Menangani Cetak Pengeluaran dengan PDF
-// Fungsi untuk Menangani Cetak Pengeluaran dengan PDF
 function generateRekapDataPDF(year, month, user, expenses, targetNumber, tujuanPengeluaran) {
-  // --- Kalkulasi Data ---
   const totalRealisasi = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const saldoAkhir = targetNumber - totalRealisasi;
   const percentage = targetNumber === 0 ? 0 : ((totalRealisasi / targetNumber) * 100).toFixed(2);
   const tujuanFormatted = capitalizeFirstLetter(tujuanPengeluaran);
   const monthName = capitalizeFirstLetter(getMonthName(month));
 
-  // --- Inisialisasi PDF ---
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageMargin = 15;
-  let currentY = pageMargin; // Posisi Y saat ini
+  let currentY = pageMargin; 
 
-  // ===== PERBAIKAN 1: Pastikan Judul & Subjudul Ada =====
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   const title = `Rekap Pengeluaran ${tujuanFormatted}`;
-  const subtitle = `Bulan ${monthName} ${year}`; // Menggunakan tahun dan bulan dari parameter
+  const subtitle = `Bulan ${monthName} ${year}`; 
   doc.text(title, pageWidth / 2, currentY, { align: 'center' });
-  currentY += 7; // Jarak
+  currentY += 7; 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(subtitle, pageWidth / 2, currentY, { align: 'center' });
-  currentY += 12; // Spasi setelah subjudul
-  // ======================================================
+  currentY += 12; 
 
-  // ===== PERBAIKAN 2: Pastikan Ringkasan Keuangan Ada =====
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.text('Ringkasan Keuangan:', pageMargin, currentY);
@@ -4327,10 +3464,8 @@ function generateRekapDataPDF(year, month, user, expenses, targetNumber, tujuanP
   currentY += 6;
   doc.text(`Persentase Realisasi`, pageMargin, currentY);
   doc.text(`: ${percentage}%`, pageMargin + 50, currentY);
-  currentY += 10; // Spasi sebelum tabel detail
-  // =======================================================
+  currentY += 10; 
 
-  // --- Tabel Pengeluaran ---
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.text('Detail Transaksi:', pageMargin, currentY);
@@ -4347,16 +3482,9 @@ function generateRekapDataPDF(year, month, user, expenses, targetNumber, tujuanP
     const barang = capitalizeFirstLetter(exp.barang);
     const kategori = capitalizeFirstLetter(exp.kategori);
     const jumlah = exp.amount.toLocaleString('id-ID');
-    const rowData = [tanggal, barang, kategori, jumlah]; // Sudah benar (4 kolom)
+    const rowData = [tanggal, barang, kategori, jumlah]; 
     tableRows.push(rowData);
   });
-
-  // ===== PERBAIKAN 3: Hapus Baris Total di Akhir Tabel =====
-  // tableRows.push([
-  //   { content: 'Total Pengeluaran', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
-  //   { content: `Rp${totalRealisasi.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }
-  // ]); // Baris ini dihapus/dikomentari
-  // ========================================================
 
   doc.autoTable({
     head: [tableColumn],
@@ -4365,79 +3493,68 @@ function generateRekapDataPDF(year, month, user, expenses, targetNumber, tujuanP
     theme: 'striped',
     headStyles: { fillColor: [75, 0, 130], textColor: 255, fontStyle: 'bold' },
     styles: { fontSize: 9, cellPadding: 2.5 },
-    columnStyles: { // Lebar kolom disesuaikan
+    columnStyles: { 
       0: { halign: 'center', cellWidth: 28 },
-      1: { halign: 'left', cellWidth: 'auto' }, // Biarkan barang otomatis
+      1: { halign: 'left', cellWidth: 'auto' }, 
       2: { halign: 'left', cellWidth: 45 },
       3: { halign: 'right', cellWidth: 35 }
     },
     didDrawPage: function (data) {
-       // Footer
        const pageCount = doc.internal.getNumberOfPages(); doc.setFontSize(9); doc.setTextColor(150);
        doc.text(`Generated by Mumy - Halaman ${data.pageNumber} dari ${pageCount}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
     }
   });
 
-  // --- Simpan PDF ---
   const fileName = `Rekap_Pengeluaran_${tujuanFormatted.replace(/\s+/g, '_')}_${monthName}_${year}.pdf`;
   doc.save(fileName);
 }
-// Fungsi untuk Menginisialisasi Dropdown Bulan dan Kategori pada Category Expense Enhanced
+
 function initializeCategoryExpenseEnhanced() {
   const selectMonth = document.getElementById('select-category-month');
   const selectCategory = document.getElementById('select-category');
   const categoryStatistic = document.getElementById('category-statistic');
-  const toggleStatsButton = document.getElementById('toggle-category-stats'); // Tombol Lihat Detail (Poin E)
+  const toggleStatsButton = document.getElementById('toggle-category-stats'); 
 
-  if (!selectMonth || !selectCategory || !categoryStatistic || !toggleStatsButton) return; // Guard clause
+  if (!selectMonth || !selectCategory || !categoryStatistic || !toggleStatsButton) return; 
 
-  // Populate Month Options
   populateCategoryExpenseMonthOptions();
+  populateCategoryExpenseCategoryOptions(); 
 
-  // Populate Category Options
-  populateCategoryExpenseCategoryOptions(); // Panggil tanpa argumen untuk load semua kategori awal
-
-  // Event Listener untuk Pemilihan Bulan
   selectMonth.addEventListener('change', () => {
     const selectedOption = selectMonth.options[selectMonth.selectedIndex];
     const selectedMonth = selectedOption.value;
     const selectedYear = selectedOption.getAttribute('data-year');
 
-    // Sembunyikan statistik saat bulan berubah
     const collapseElement = document.getElementById('category-stats-collapse');
     if (collapseElement) {
         const bsCollapse = bootstrap.Collapse.getInstance(collapseElement) || new bootstrap.Collapse(collapseElement, {toggle: false});
         bsCollapse.hide();
-        toggleStatsButton.innerHTML = '<i class="fas fa-info-circle me-2"></i> Lihat Detail Statistik'; // Reset teks tombol
+        toggleStatsButton.innerHTML = '<i class="fas fa-info-circle me-2"></i> Lihat Detail Statistik'; 
         toggleStatsButton.setAttribute('aria-expanded', 'false');
     }
-
 
     if (selectedMonth && selectedYear) {
       populateCategoryExpenseCategoryOptions(selectedMonth, selectedYear);
       selectCategory.disabled = false;
     } else {
-      // Jika "Pilih Bulan" dipilih, reset kategori
-      populateCategoryExpenseCategoryOptions(); // Load semua kategori lagi
+      populateCategoryExpenseCategoryOptions(); 
       selectCategory.innerHTML = '<option value="">Pilih Kategori</option>';
       selectCategory.disabled = true;
     }
-    // Reset grafik dan statistik
+    
     if (categoryDailyExpenseChart instanceof Chart) {
       categoryDailyExpenseChart.destroy();
-      categoryDailyExpenseChart = null; // Set ke null
+      categoryDailyExpenseChart = null; 
     }
-    categoryStatistic.innerHTML = ''; // Kosongkan statistik
+    categoryStatistic.innerHTML = ''; 
   });
 
-  // Event Listener untuk Pemilihan Kategori
   selectCategory.addEventListener('change', () => {
     const selectedOption = selectMonth.options[selectMonth.selectedIndex];
     const selectedMonth = selectedOption.value;
     const selectedYear = selectedOption.getAttribute('data-year');
     const selectedCategory = selectCategory.value;
 
-    // Sembunyikan statistik saat kategori berubah
     const collapseElement = document.getElementById('category-stats-collapse');
      if (collapseElement) {
         const bsCollapse = bootstrap.Collapse.getInstance(collapseElement) || new bootstrap.Collapse(collapseElement, {toggle: false});
@@ -4448,28 +3565,25 @@ function initializeCategoryExpenseEnhanced() {
 
     if (selectedCategory && selectedMonth && selectedYear) {
       renderCategoryDailyExpenseChart(selectedMonth, selectedYear, selectedCategory, categoryStatistic);
-      toggleStatsButton.disabled = false; // Aktifkan tombol detail
+      toggleStatsButton.disabled = false; 
     } else {
       if (categoryDailyExpenseChart instanceof Chart) {
         categoryDailyExpenseChart.destroy();
-         categoryDailyExpenseChart = null; // Set ke null
+         categoryDailyExpenseChart = null; 
       }
-      categoryStatistic.innerHTML = ''; // Kosongkan statistik
-      toggleStatsButton.disabled = true; // Nonaktifkan tombol detail
+      categoryStatistic.innerHTML = ''; 
+      toggleStatsButton.disabled = true; 
     }
   });
 
-   // BARU: Event listener untuk tombol "Lihat Detail Statistik" (Poin E)
    toggleStatsButton.addEventListener('click', (e) => {
         const isExpanded = e.currentTarget.getAttribute('aria-expanded') === 'true';
-        // Toggle teks tombol berdasarkan state SETELAH klik
         e.currentTarget.innerHTML = !isExpanded
             ? '<i class="fas fa-eye-slash me-2"></i> Sembunyikan Detail'
             : '<i class="fas fa-info-circle me-2"></i> Lihat Detail Statistik';
    });
 }
 
-// Fungsi untuk Memenuhi Opsi Bulan pada Category Expense Enhanced
 function populateCategoryExpenseMonthOptions() {
   const selectMonth = document.getElementById('select-category-month');
   if (!selectMonth) return;
@@ -4480,20 +3594,19 @@ function populateCategoryExpenseMonthOptions() {
     if (key.startsWith(`expenses_${currentUser}_`)) {
       const parts = key.split('_');
       if (parts.length === 4) {
-        yearMonths.add(`${parts[2]}-${parts[3]}`); // Format: year-month
+        yearMonths.add(`${parts[2]}-${parts[3]}`); 
       }
     }
   }
 
-  // Convert to array and sort descending
   const yearMonthArray = Array.from(yearMonths).sort((a, b) => {
     const [yearA, monthA] = a.split('-').map(Number);
     const [yearB, monthB] = b.split('-').map(Number);
-    return yearB - yearA || monthB - monthA; // Sort by year desc, then month desc
+    return yearB - yearA || monthB - monthA; 
   });
 
-  const currentSelection = selectMonth.value + '-' + selectMonth.options[selectMonth.selectedIndex]?.getAttribute('data-year'); // Simpan value & tahun
-  selectMonth.innerHTML = '<option value="">Pilih Bulan</option>'; // Default
+  const currentSelection = selectMonth.value + '-' + selectMonth.options[selectMonth.selectedIndex]?.getAttribute('data-year'); 
+  selectMonth.innerHTML = '<option value="">Pilih Bulan</option>'; 
 
   if (yearMonthArray.length === 0) {
     selectMonth.innerHTML = '<option value="">Tidak ada data</option>';
@@ -4501,10 +3614,9 @@ function populateCategoryExpenseMonthOptions() {
     yearMonthArray.forEach(ym => {
       const [year, month] = ym.split('-');
       const option = document.createElement('option');
-      option.value = month; // Value adalah bulan
-      option.setAttribute('data-year', year); // Simpan tahun di data attribute
+      option.value = month; 
+      option.setAttribute('data-year', year); 
       option.textContent = `${getMonthName(month)} ${year}`;
-       // Cek jika ini adalah pilihan sebelumnya
        if (`${month}-${year}` === currentSelection) {
            option.selected = true;
        }
@@ -4513,7 +3625,6 @@ function populateCategoryExpenseMonthOptions() {
   }
 }
 
-// Fungsi untuk Memenuhi Opsi Kategori pada Category Expense Enhanced
 function populateCategoryExpenseCategoryOptions(selectedMonth = null, selectedYear = null) {
   const selectCategory = document.getElementById('select-category');
   if (!selectCategory) return;
@@ -4521,11 +3632,9 @@ function populateCategoryExpenseCategoryOptions(selectedMonth = null, selectedYe
   let expenses = [];
 
   if (selectedMonth && selectedYear) {
-    // Ambil data untuk bulan & tahun spesifik
     const expensesKey = `expenses_${currentUser}_${selectedYear}_${selectedMonth}`;
     expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
   } else {
-    // Ambil SEMUA data jika tidak ada bulan/tahun dipilih (untuk inisialisasi)
     for (let key in localStorage) {
       if (key.startsWith(`expenses_${currentUser}_`)) {
         const monthExpenses = JSON.parse(localStorage.getItem(key)) || [];
@@ -4535,8 +3644,8 @@ function populateCategoryExpenseCategoryOptions(selectedMonth = null, selectedYe
   }
 
   const categories = new Set(expenses.map(exp => exp.kategori));
-  const currentSelection = selectCategory.value; // Simpan pilihan saat ini
-  selectCategory.innerHTML = ''; // Kosongkan
+  const currentSelection = selectCategory.value; 
+  selectCategory.innerHTML = ''; 
 
   if (categories.size === 0) {
     selectCategory.innerHTML = '<option value="">Tidak ada kategori</option>';
@@ -4547,29 +3656,24 @@ function populateCategoryExpenseCategoryOptions(selectedMonth = null, selectedYe
       const option = document.createElement('option');
       option.value = kategori.toLowerCase();
       option.textContent = capitalizeFirstLetter(kategori);
-       // Cek jika ini adalah pilihan sebelumnya
        if (kategori.toLowerCase() === currentSelection) {
            option.selected = true;
        }
       selectCategory.appendChild(option);
     });
-    // Hanya disable jika TIDAK ada bulan/tahun yang dipilih
     selectCategory.disabled = !(selectedMonth && selectedYear);
   }
 }
 
-// MODIFIKASI: Fungsi Merender Grafik Harian per Kategori (Jadi Line Chart - Poin E)
 function renderCategoryDailyExpenseChart(selectedMonth, selectedYear, selectedCategory, statisticDiv) {
   const currentUser = localStorage.getItem('currentUser');
   const expensesKey = `expenses_${currentUser}_${selectedYear}_${selectedMonth}`;
   const expenses = JSON.parse(localStorage.getItem(expensesKey)) || [];
-  const totalExpensesMonthKey = `expenses_${currentUser}_${selectedYear}_${selectedMonth}`; // Key yang sama
+  const totalExpensesMonthKey = `expenses_${currentUser}_${selectedYear}_${selectedMonth}`; 
   const totalExpensesInMonth = JSON.parse(localStorage.getItem(totalExpensesMonthKey)) || [];
 
-  // Filter expenses by category
   const filteredExpenses = expenses.filter(exp => exp.kategori.toLowerCase() === selectedCategory.toLowerCase());
 
-  // Mengelompokkan pengeluaran berdasarkan tanggal
   const grouped = filteredExpenses.reduce((acc, exp) => {
     const dateObj = new Date(exp.date);
     if (isNaN(dateObj.getTime())) return acc;
@@ -4586,25 +3690,24 @@ function renderCategoryDailyExpenseChart(selectedMonth, selectedYear, selectedCa
   });
 
   const ctx = document.getElementById('category-daily-chart')?.getContext('2d');
-  if (!ctx) return; // Guard clause
+  if (!ctx) return; 
 
-  // Destroy chart sebelumnya jika ada
   if (categoryDailyExpenseChart instanceof Chart) {
     categoryDailyExpenseChart.destroy();
     categoryDailyExpenseChart = null;
   }
 
   categoryDailyExpenseChart = new Chart(ctx, {
-    type: 'line', // <-- UBAH KE LINE CHART (Poin E)
+    type: 'line', 
     data: {
       labels: labels,
       datasets: [{
         label: `Pengeluaran Harian (${capitalizeFirstLetter(selectedCategory)})`,
         data: data,
-        fill: true, // Beri area fill
+        fill: true, 
         backgroundColor: 'rgba(75, 0, 130, 0.2)',
         borderColor: '#4b0082',
-        tension: 0.4, // Buat garis lebih melengkung
+        tension: 0.4, 
         pointBackgroundColor: '#4b0082',
         pointBorderColor: '#4b0082',
         pointRadius: 3,
@@ -4615,7 +3718,7 @@ function renderCategoryDailyExpenseChart(selectedMonth, selectedYear, selectedCa
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false }, // Sembunyikan legend
+        legend: { display: false }, 
         title: {
           display: true,
           text: `Grafik Harian Kategori ${capitalizeFirstLetter(selectedCategory)} (${capitalizeFirstLetter(getMonthName(selectedMonth))} ${selectedYear})`,
@@ -4629,40 +3732,33 @@ function renderCategoryDailyExpenseChart(selectedMonth, selectedYear, selectedCa
         x: { ticks: { color: '#333333' }, grid: { color: '#e0e0e0' }, title: { display: true, text: 'Tanggal' } },
         y: { ticks: { color: '#333333' }, grid: { color: '#e0e0e0' }, title: { display: true, text: 'Jumlah (Rp)' } }
       },
-      // Klik tidak melakukan apa-apa (zoom via tombol)
       onClick: null,
       onHover: null
     },
   });
 
-  // Menampilkan Statistik (dipanggil setelah chart render) - Poin E
   displayCategoryStatistic(filteredExpenses, totalExpensesInMonth, selectedCategory, statisticDiv);
 }
 
-// MODIFIKASI: Fungsi Menampilkan Statistik Kategori Enhanced (Poin E)
 function displayCategoryStatistic(categoryExpenses, totalMonthExpenses, kategori, statisticDiv) {
-   if (!statisticDiv) return; // Guard clause
+   if (!statisticDiv) return; 
    
   if (categoryExpenses.length === 0) {
     statisticDiv.innerHTML = '<p class="text-center text-muted">Tidak ada data pengeluaran untuk kategori ini pada bulan yang dipilih.</p>';
     return;
   }
 
-  // 1. Total Pengeluaran Kategori
   const totalKategori = categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
-  // 2. Kontribusi Pengeluaran (%)
   const totalBulan = totalMonthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
   const kontribusi = totalBulan > 0 ? ((totalKategori / totalBulan) * 100).toFixed(1) : 0;
 
-  // 3. Rata-rata Pengeluaran Kategori Harian
   const daysWithCategoryExpenses = new Set(categoryExpenses.map(exp => {
       const dateObj = new Date(exp.date);
       return !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString('id-ID') : null;
   })).size;
   const avgKategoriHarian = daysWithCategoryExpenses > 0 ? (totalKategori / daysWithCategoryExpenses) : 0;
 
-  // 4. Pengeluaran Harian Tertinggi (untuk kategori ini)
    const groupedDailyCategory = categoryExpenses.reduce((acc, exp) => {
     const dateObj = new Date(exp.date);
     if (isNaN(dateObj.getTime())) return acc;
@@ -4673,7 +3769,6 @@ function displayCategoryStatistic(categoryExpenses, totalMonthExpenses, kategori
   const maxDailyAmount = Math.max(...Object.values(groupedDailyCategory), 0);
   const maxDailyDate = Object.keys(groupedDailyCategory).find(date => groupedDailyCategory[date] === maxDailyAmount) || '-';
 
-  // Format Statistik BARU (Mirip Pengeluaran Harian)
   const statsHtml = `
     <ul class="list-group">
         <li class="list-group-item">
@@ -4697,30 +3792,29 @@ function displayCategoryStatistic(categoryExpenses, totalMonthExpenses, kategori
   statisticDiv.innerHTML = statsHtml;
 }
 
-// Fungsi untuk Menginisialisasi Tahun untuk Riwayat
 function initializeHistoryYearOptions() {
   const historyYearSelect = document.getElementById('history-year');
-  if (!historyYearSelect) return; // Guard clause
+  if (!historyYearSelect) return; 
   const currentUser = localStorage.getItem('currentUser');
   const years = new Set();
 
   for (let key in localStorage) {
     if (key.startsWith(`expenses_${currentUser}_`)) {
       const parts = key.split('_');
-      if (parts.length === 4) { // expenses_user_year_month
+      if (parts.length === 4) { 
         years.add(parts[2]);
       }
     }
   }
 
-  const currentSelection = historyYearSelect.value; // Simpan pilihan saat ini
-  historyYearSelect.innerHTML = ''; // Kosongkan
+  const currentSelection = historyYearSelect.value; 
+  historyYearSelect.innerHTML = ''; 
 
   if (years.size === 0) {
     historyYearSelect.innerHTML = '<option value="">Tidak ada riwayat</option>';
   } else {
     historyYearSelect.innerHTML = '<option value="">Pilih Tahun</option>';
-    Array.from(years).sort((a,b) => b - a).forEach(year => { // Sort descending
+    Array.from(years).sort((a,b) => b - a).forEach(year => { 
       const option = document.createElement('option');
       option.value = year;
       option.textContent = year;
@@ -4728,52 +3822,48 @@ function initializeHistoryYearOptions() {
     });
   }
 
-  historyYearSelect.value = currentSelection; // Coba set ke pilihan lama
-  if (!historyYearSelect.value) { // Jika pilihan lama tidak ada lagi atau belum dipilih
-      populateHistoryMonthOptions(null); // Reset bulan
-      document.getElementById('history-content').innerHTML = '<p>Silakan pilih tahun dan bulan untuk melihat riwayat pengeluaran.</p>'; // Reset konten
+  historyYearSelect.value = currentSelection; 
+  if (!historyYearSelect.value) { 
+      populateHistoryMonthOptions(null); 
+      document.getElementById('history-content').innerHTML = '<p>Silakan pilih tahun dan bulan untuk melihat riwayat pengeluaran.</p>'; 
   } else {
-       // Jika tahun sudah terpilih, populate bulan
        populateHistoryMonthOptions(historyYearSelect.value);
   }
 
-
-  historyYearSelect.removeEventListener('change', historyYearChangeListener); // Hapus listener lama
-  historyYearSelect.addEventListener('change', historyYearChangeListener); // Tambah listener baru
+  historyYearSelect.removeEventListener('change', historyYearChangeListener); 
+  historyYearSelect.addEventListener('change', historyYearChangeListener); 
 }
 
 function historyYearChangeListener() {
     const selectedYear = document.getElementById('history-year').value;
     populateHistoryMonthOptions(selectedYear);
-    // Reset konten jika tahun diubah
     const historyContent = document.getElementById('history-content');
     if (historyContent) historyContent.innerHTML = '<p>Silakan pilih tahun dan bulan untuk melihat riwayat pengeluaran.</p>';
 }
 
-// Fungsi untuk Menginisialisasi Tahun untuk Cetak Rekap
 function initializePrintYearOptions() {
   const printYearSelect = document.getElementById('print-year');
-   if (!printYearSelect) return; // Guard clause
+   if (!printYearSelect) return; 
   const currentUser = localStorage.getItem('currentUser');
   const years = new Set();
 
   for (let key in localStorage) {
     if (key.startsWith(`expenses_${currentUser}_`)) {
       const parts = key.split('_');
-      if (parts.length === 4) { // expenses_user_year_month
+      if (parts.length === 4) { 
         years.add(parts[2]);
       }
     }
   }
 
-  const currentSelection = printYearSelect.value; // Simpan pilihan saat ini
-  printYearSelect.innerHTML = ''; // Kosongkan
+  const currentSelection = printYearSelect.value; 
+  printYearSelect.innerHTML = ''; 
 
   if (years.size === 0) {
     printYearSelect.innerHTML = '<option value="">Tidak ada riwayat</option>';
   } else {
     printYearSelect.innerHTML = '<option value="">Pilih Tahun</option>';
-    Array.from(years).sort((a,b) => b - a).forEach(year => { // Sort descending
+    Array.from(years).sort((a,b) => b - a).forEach(year => { 
       const option = document.createElement('option');
       option.value = year;
       option.textContent = year;
@@ -4781,15 +3871,15 @@ function initializePrintYearOptions() {
     });
   }
 
-  printYearSelect.value = currentSelection; // Coba set ke pilihan lama
+  printYearSelect.value = currentSelection; 
   if (!printYearSelect.value) {
-      populatePrintMonthOptions(null); // Reset bulan
+      populatePrintMonthOptions(null); 
   } else {
-      populatePrintMonthOptions(printYearSelect.value); // Populate bulan jika tahun ada
+      populatePrintMonthOptions(printYearSelect.value); 
   }
 
-  printYearSelect.removeEventListener('change', printYearChangeListener); // Hapus listener lama
-  printYearSelect.addEventListener('change', printYearChangeListener); // Tambah listener baru
+  printYearSelect.removeEventListener('change', printYearChangeListener); 
+  printYearSelect.addEventListener('change', printYearChangeListener); 
 }
 
 function printYearChangeListener() {
@@ -4797,15 +3887,14 @@ function printYearChangeListener() {
     populatePrintMonthOptions(selectedYear);
 }
 
-// Fungsi untuk Menginisialisasi Dropdown Bulan pada Riwayat
 function populateHistoryMonthOptions(selectedYear) {
   const historyMonthSelect = document.getElementById('history-month');
-   if (!historyMonthSelect) return; // Guard clause
+   if (!historyMonthSelect) return; 
   const currentUser = localStorage.getItem('currentUser');
   const months = [];
 
-  const currentSelection = historyMonthSelect.value; // Simpan pilihan bulan
-  historyMonthSelect.innerHTML = ''; // Kosongkan
+  const currentSelection = historyMonthSelect.value; 
+  historyMonthSelect.innerHTML = ''; 
 
   if (!selectedYear) {
     historyMonthSelect.innerHTML = '<option value="">Pilih Tahun Dulu</option>';
@@ -4823,12 +3912,10 @@ function populateHistoryMonthOptions(selectedYear) {
     historyMonthSelect.innerHTML = '<option value="">Tidak ada riwayat</option>';
   } else {
     historyMonthSelect.innerHTML = '<option value="">Pilih Bulan</option>';
-    // Sort bulan secara descending
     months.sort((a, b) => b - a).forEach(month => {
       const option = document.createElement('option');
       option.value = month;
       option.textContent = getMonthName(month);
-       // Coba set ke pilihan lama
        if (month == currentSelection) {
            option.selected = true;
        }
@@ -4836,25 +3923,23 @@ function populateHistoryMonthOptions(selectedYear) {
     });
   }
    
-   // Jika ada pilihan bulan sebelumnya dan bulan itu ada, panggil render
    if (historyMonthSelect.value) {
        renderHistoryContent();
    }
 
 
-  historyMonthSelect.removeEventListener('change', renderHistoryContent); // Hapus listener lama
-  historyMonthSelect.addEventListener('change', renderHistoryContent); // Tambah listener baru
+  historyMonthSelect.removeEventListener('change', renderHistoryContent); 
+  historyMonthSelect.addEventListener('change', renderHistoryContent); 
 }
 
-// Fungsi untuk Menginisialisasi Dropdown Bulan pada Cetak Rekap
 function populatePrintMonthOptions(selectedYear) {
   const printMonthSelect = document.getElementById('print-month');
-  if (!printMonthSelect) return; // Guard clause
+  if (!printMonthSelect) return; 
   const currentUser = localStorage.getItem('currentUser');
   const months = [];
 
-  const currentSelection = printMonthSelect.value; // Simpan pilihan bulan
-  printMonthSelect.innerHTML = ''; // Kosongkan
+  const currentSelection = printMonthSelect.value; 
+  printMonthSelect.innerHTML = ''; 
 
   if (!selectedYear) {
     printMonthSelect.innerHTML = '<option value="">Pilih Tahun Dulu</option>';
@@ -4872,12 +3957,10 @@ function populatePrintMonthOptions(selectedYear) {
     printMonthSelect.innerHTML = '<option value="">Tidak ada riwayat</option>';
   } else {
     printMonthSelect.innerHTML = '<option value="">Pilih Bulan</option>';
-    // Sort bulan secara descending
     months.sort((a, b) => b - a).forEach(month => {
       const option = document.createElement('option');
       option.value = month;
       option.textContent = getMonthName(month);
-      // Coba set ke pilihan lama
        if (month == currentSelection) {
            option.selected = true;
        }
@@ -4886,7 +3969,6 @@ function populatePrintMonthOptions(selectedYear) {
   }
 }
 
-// Fungsi untuk Mendapatkan Semua Tanggal dalam Bulan Tertentu
 function getAllDatesInMonth(year, month) {
   const date = new Date(year, month - 1, 1);
   const dates = [];
@@ -4897,115 +3979,58 @@ function getAllDatesInMonth(year, month) {
   return dates;
 }
 
-/**
- * ==========================================================
- * FUNGSI UNTUK DIGANTI: (Ganti fungsi lama Anda dengan ini)
- * ==========================================================
- * Fungsi untuk Menghasilkan Palet Warna Terang (Diperbanyak jadi 40)
- * @param {number} num - Jumlah warna yang dibutuhkan (meskipun array ini berisi 40)
- * @returns {Array} - Array berisi kode warna hex
- */
+// ngasilin palette hex color otomatis 
 function generateBrightColorPalette(num) {
   const palette = [];
-  // --- DAFTAR WARNA DIPERBANYAK MENJADI 40 ---
   const predefinedColors = [
-    // Original 10 + Expanded 15 = 25 colors
-    '#4b0082', // 1. Ungu Gelap
-    '#E91E63', // 2. Pink Cerah
-    '#FF9800', // 3. Oranye
-    '#20c997', // 4. Hijau Mint
-    '#03A9F4', // 5. Biru Langit
-    '#FBC02D', // 6. Kuning Mustard
-    '#e63946', // 7. Merah Terang
-    '#9C27B0', // 8. Ungu Terong
-    '#4CAF50', // 9. Hijau Daun
-    '#2196F3', // 10. Biru Cerah
-    '#FF5722', // 11. Oranye Tua
-    '#8BC34A', // 12. Hijau Muda
-    '#00BCD4', // 13. Cyan
-    '#673AB7', // 14. Ungu Violet
-    '#CDDC39', // 15. Hijau Limau
-    '#FFEB3B', // 16. Kuning Cerah
-    '#795548', // 17. Coklat
-    '#009688', // 18. Teal
-    '#FFC107', // 19. Amber
-    '#607D8B', // 20. Abu Kebiruan
-    '#EC407A', // 21. Pink Medium
-    '#FFEE58', // 22. Kuning Pucat
-    '#9CCC65', // 23. Hijau Apel
-    '#29B6F6', // 24. Biru Langit Cerah
-    '#AB47BC', // 25. Ungu Anggrek
-    '#FFA726', // 26. Oranye Aprikot
-    '#7E57C2', // 27. Ungu Lavender Tua
-    '#EF5350', // 28. Merah Bata Muda
-    '#66BB6A', // 29. Hijau Laut Medium
-    '#42A5F5', // 30. Biru Dodger Medium
-    '#FF7043', // 31. Oranye Koral
-    '#D4E157', // 32. Hijau Limau Terang
-    '#26C6DA', // 33. Cyan Terang
-    '#BDBDBD', // 34. Abu-abu Medium
-    '#8D6E63', // 35. Coklat Muda
-    '#5C6BC0', // 36. Biru Indigo Muda
-    '#D81B60', // 37. Magenta Tua
-    '#FDD835', // 38. Kuning Lemon
-    '#00897B', // 39. Teal Tua
-    '#C2185B'  // 40. Pink Tua
+    '#4b0082', '#E91E63', '#FF9800', '#20c997', '#03A9F4', 
+    '#FBC02D', '#e63946', '#9C27B0', '#4CAF50', '#2196F3', 
+    '#FF5722', '#8BC34A', '#00BCD4', '#673AB7', '#CDDC39', 
+    '#FFEB3B', '#795548', '#009688', '#FFC107', '#607D8B', 
+    '#EC407A', '#FFEE58', '#9CCC65', '#29B6F6', '#AB47BC', 
+    '#FFA726', '#7E57C2', '#EF5350', '#66BB6A', '#42A5F5', 
+    '#FF7043', '#D4E157', '#26C6DA', '#BDBDBD', '#8D6E63', 
+    '#5C6BC0', '#D81B60', '#FDD835', '#00897B', '#C2185B'  
   ];
-  // --- AKHIR DAFTAR WARNA ---
 
-  // Logika untuk mengambil warna tetap sama (modulo)
   for (let i = 0; i < num; i++) {
     palette.push(predefinedColors[i % predefinedColors.length]);
   }
   return palette;
 }
 
-// Fungsi untuk Mendapatkan Bulan Saat Ini dalam Format Angka
 function getCurrentMonth() {
   const now = new Date();
-  return now.getMonth() + 1; // Januari = 1
+  return now.getMonth() + 1; 
 }
 
-// Fungsi untuk Mendapatkan Tahun Saat Ini
 function getCurrentYear() {
   const now = new Date();
   return now.getFullYear();
 }
 
-// Fungsi untuk Mendapatkan Nama Bulan Berdasarkan Angka
 function getMonthName(monthNumber) {
-   if (!monthNumber || monthNumber < 1 || monthNumber > 12) return ''; // Handle invalid input
+   if (!monthNumber || monthNumber < 1 || monthNumber > 12) return ''; 
   const date = new Date();
-  // Set ke tanggal 1 bulan itu untuk menghindari masalah tanggal 31
   date.setDate(1); 
   date.setMonth(monthNumber - 1);
   return date.toLocaleString('id-ID', { month: 'long' });
 }
 
-// Fungsi untuk Capitalize First Letter
 function capitalizeFirstLetter(string) {
   if (!string || typeof string !== 'string') return '';
   return string.replace(/\b\w/g, char => char.toUpperCase());
 }
 
-// Fungsi untuk Memperbarui Opsi Kategori Dropdown pada Category Expense
 function updateCategoryDropdownOptions() {
-  // Panggil fungsi populate yang lebih spesifik
   populateCategoryExpenseCategoryOptions();
 }
 
-// Fungsi untuk Inisialisasi Menu Event Listeners (Kosong, karena sudah di initializeApp)
-function initializeMenuEventListeners() {
-  // Event listeners dipindahkan ke initializeApp()
-}
-
-// Fungsi untuk Menampilkan Tips Modal
 function showTipsModal(message) {
   const tipsModalContent = document.querySelector('#tipsModal .modal-body');
   if(tipsModalContent) {
       tipsModalContent.textContent = message;
   }
-  // Pastikan instance modal sudah ada atau buat baru jika perlu
   const tipsModalEl = document.getElementById('tipsModal');
   if(tipsModalEl) {
       const tipsModal = bootstrap.Modal.getOrCreateInstance(tipsModalEl);
@@ -5013,12 +4038,10 @@ function showTipsModal(message) {
   }
 }
 
-// --- BARU: Fitur Ekspor Excel (Poin D) ---
-
-// Fungsi utama untuk menangani ekspor Excel
+// logic export ke excel
 function handleExportExcel() {
-    showLoading("Mengumpulkan data..."); // Tampilkan loading
-    setTimeout(() => { // Beri jeda agar UI loading sempat tampil
+    showLoading("Mengumpulkan data..."); 
+    setTimeout(() => { 
         try {
             const allExpenses = getAllUserExpenses();
             if (allExpenses.length === 0) {
@@ -5040,10 +4063,9 @@ function handleExportExcel() {
             hideLoading();
             showNotification("Terjadi kesalahan saat membuat file Excel.", "danger");
         }
-    }, 500); // Jeda 0.5 detik
+    }, 500); 
 }
 
-// Fungsi untuk mengumpulkan semua data expense pengguna dari localStorage
 function getAllUserExpenses() {
     const currentUser = localStorage.getItem('currentUser');
     if (!currentUser) return [];
@@ -5055,106 +4077,80 @@ function getAllUserExpenses() {
             allExpenses = allExpenses.concat(monthExpenses);
         }
     }
-    // Urutkan berdasarkan tanggal (terlama ke terbaru)
     allExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
     return allExpenses;
 }
 
-// Fungsi untuk mengubah data expense menjadi format Excel yang diinginkan
-// Fungsi untuk mengubah data expense menjadi format Excel yang diinginkan
 function transformDataForExcel(expenses) {
     return expenses.map((exp, index) => {
         const dateObj = new Date(exp.date);
-        // Panggil getDateParts yang sudah diperbarui untuk mendapatkan tahun dan jam
-        const { tanggal, bulan, mingguKe, bagianBulan, tahun, jam } = getDateParts(dateObj); // Ambil tahun & jam
+        const { tanggal, bulan, mingguKe, bagianBulan, tahun, jam } = getDateParts(dateObj); 
         const namaHari = getNamaHari(dateObj);
         const jenisHari = getJenisHari(namaHari);
         const bagianHari = getBagianHari(dateObj);
 
-        // Urutan kolom baru: No, Item, Kategori, Harga, Tanggal, Jam, Hari, Jenis Hari, Bagian Hari, Minggu, Bulan, Bagian Bulan, Tahun
         return {
             "No": index + 1,
             "Nama Item": capitalizeFirstLetter(exp.barang),
             "Kategori": capitalizeFirstLetter(exp.kategori),
-            "Tahun": tahun,// Pindahkan harga
+            "Tahun": tahun,
             "Tanggal": tanggal,
-            "Jam": jam,                      // <-- Kolom Jam ditambahkan
+            "Jam": jam,                      
             "Nama Hari": namaHari,
             "Jenis Hari": jenisHari,
             "Bagian Hari": bagianHari,
             "Minggu ke-": mingguKe,
             "Bulan": bulan,
             "Bagian Bulan": bagianBulan,
-            "Tahun": tahun,
-            "Harga": exp.amount                              // <-- Kolom Tahun ditambahkan
-            // "Sumber_Dana": Sudah Dihapus
+            "Harga": exp.amount                              
         };
     });
 }
 
-// Fungsi untuk membuat dan mengunduh file Excel menggunakan SheetJS
 function generateExcelFile(data) {
-    // Buat worksheet dari array of objects
     const worksheet = XLSX.utils.json_to_sheet(data);
-    
-    // Buat workbook baru
     const workbook = XLSX.utils.book_new();
     
-    // Tambahkan worksheet ke workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran"); // Nama sheet
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran"); 
 
-    // Atur lebar kolom (opsional, tapi bagus untuk tampilan)
-    // Dapatkan array lebar kolom berdasarkan panjang header atau data terpanjang
      const colWidths = Object.keys(data[0]).map(key => {
          const headerLength = key.length;
          const dataLengths = data.map(row => String(row[key] || '').length);
          const maxLength = Math.max(headerLength, ...dataLengths);
-         return { wch: maxLength + 2 }; // Tambah padding
+         return { wch: maxLength + 2 }; 
      });
      worksheet["!cols"] = colWidths;
 
-
-    // Buat file Excel dan trigger download
-    // Nama file: Dataset_Pengeluaran_YYYYMMDD_HHMM.xlsx
     const now = new Date();
     const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`;
     const fileName = `Dataset_Pengeluaran_Mumy_${timestamp}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
 
-// --- Helper Functions untuk Ekspor Excel ---
-
-// Mendapatkan bagian-bagian tanggal
-// Mendapatkan bagian-bagian tanggal, termasuk Tahun dan Jam
 function getDateParts(dateObj) {
      if (isNaN(dateObj.getTime())) {
-         // Kembalikan nilai default untuk semua bagian jika tanggal tidak valid
          return { tanggal: '-', bulan: '-', mingguKe: '-', bagianBulan: '-', tahun: '-', jam: '-' };
      }
-    const tanggal = dateObj.getDate(); // 1-31
-    const bulan = dateObj.getMonth() + 1; // 1-12
-    const tahun = dateObj.getFullYear(); // <-- Ambil Tahun
-    // Format Jam menjadi HH:MM (24 jam)
-    const jam = dateObj.getHours().toString(); //
+    const tanggal = dateObj.getDate(); 
+    const bulan = dateObj.getMonth() + 1; 
+    const tahun = dateObj.getFullYear(); 
+    const jam = dateObj.getHours().toString(); 
 
-    const mingguKe = Math.ceil(tanggal / 7); // Minggu ke- (1-5)
+    const mingguKe = Math.ceil(tanggal / 7); 
 
     let bagianBulan;
     if (tanggal <= 10) bagianBulan = "Awal Bulan";
     else if (tanggal <= 20) bagianBulan = "Tengah Bulan";
     else bagianBulan = "Akhir Bulan";
 
-    // Kembalikan semua nilai termasuk tahun dan jam
     return { tanggal, bulan, mingguKe, bagianBulan, tahun, jam };
 }
 
-// Mendapatkan Nama Hari
 function getNamaHari(dateObj) {
     if (isNaN(dateObj.getTime())) return '-';
     return dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
 }
 
-// Mendapatkan Jenis Hari (Weekday/Weekend)
 function getJenisHari(namaHari) {
     if (namaHari === "Sabtu" || namaHari === "Minggu") {
         return "Weekend";
@@ -5165,20 +4161,11 @@ function getJenisHari(namaHari) {
     }
 }
 
-// Mendapatkan Bagian Hari (Pagi/Siang/Sore/Malam)
 function getBagianHari(dateObj) {
      if (isNaN(dateObj.getTime())) return '-';
-    const jam = dateObj.getHours(); // 0-23
+    const jam = dateObj.getHours(); 
     if (jam >= 5 && jam < 12) return "Pagi";
     if (jam >= 12 && jam < 15) return "Siang";
     if (jam >= 15 && jam < 19) return "Sore";
-    return "Malam"; // (19 - 4)
+    return "Malam"; 
 }
-
-// Mendapatkan Minggu ke- dalam bulan (Sudah ada di getDateParts)
-// function getMingguKe(dateObj) { ... }
-
-// Mendapatkan Bagian Bulan (Sudah ada di getDateParts)
-// function getBagianBulan(tanggal) { ... }
-
-// --- Akhir Helper Excel ---
